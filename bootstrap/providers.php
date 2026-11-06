@@ -26,7 +26,6 @@ return [
     \App\Providers\AssetProvider::class,
     // Frontend provider injection point — each UI kit's `ui:setup` will
     // inject the appropriate provider (Firefiber, React, Vue, Svelte, or None).
-    \Sahil\Contracts\Foundation\ApplicationContract::class,
     \App\Providers\ViewProvider::class,
     \App\Providers\WebRoutesProvider::class,
     \App\Providers\CacheProvider::class,
