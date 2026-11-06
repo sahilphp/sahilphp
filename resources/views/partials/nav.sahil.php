@@ -1,26 +1,29 @@
-{{--
-    Shared navigation component.
+{{-- Shared navigation component for the Bootstrap profile. --}}
+<header class="border-bottom bg-white sticky-top">
+    <nav class="navbar navbar-expand-lg navbar-light container py-2" aria-label="Main navigation">
+        @include('partials.brand', ['home_url' => home_url ?? '/'])
 
-    Layouts pass framework-specific classes and the link list, so the same
-    markup works with Tailwind, Bootstrap and plain CSS. The brand slot always
-    renders the official SahilPHP logo through `partials.brand`; a caller can
-    override it with `brand_partial`.
---}}
-<header class="{{ header_class ?? 'site-header' }}">
-    <nav class="{{ nav_class ?? 'site-nav' }}" aria-label="Main navigation">
-        @include(brand_partial ?? 'partials.brand', [
-            'home_url' => home_url ?? '/',
-            'class' => brand_class ?? 'brand',
-            'variant' => brand_variant ?? 'wordmark',
-        ])
+        <button class="navbar-toggler border-0 shadow-none" type="button" data-bs-toggle="collapse"
+            data-bs-target="#primary-navigation" aria-controls="primary-navigation"
+            aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
 
-        <ul class="{{ list_class ?? 'site-nav__list' }}">
-            @foreach (links as link)
-                <li>
-                    <a class="{{ link_class ?? 'site-nav__link' }}" href="{{ link.href }}"
-                        @if (link.current ?? false) aria-current="page" @endif>{{ link.label }}</a>
-                </li>
-            @endforeach
-        </ul>
+        <div class="collapse navbar-collapse" id="primary-navigation">
+            <ul class="navbar-nav ms-auto align-items-lg-center gap-lg-1">
+                @foreach (links as link)
+                    <li class="nav-item">
+                        <a class="nav-link px-3" href="{{ link.href }}"
+                            @if (link.current ?? false) aria-current="page" @endif>{{ link.label }}</a>
+                    </li>
+                @endforeach
+
+                @if (cta ?? null)
+                    <li class="nav-item ms-lg-2">
+                        <a class="btn btn-primary btn-sm px-3" href="{{ cta.href }}">{{ cta.label }}</a>
+                    </li>
+                @endif
+            </ul>
+        </div>
     </nav>
 </header>

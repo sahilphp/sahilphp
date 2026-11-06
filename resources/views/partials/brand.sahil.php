@@ -1,16 +1,11 @@
 {{--
-    SahilPHP brand lockup.
+    SahilPHP brand lockup for the Bootstrap profile.
 
-    The official framework logo ships with every project: `public/logo.png`
-    (mark + wordmark), `public/logo-mark.png` (mark only) and `favicon.ico`.
-    Layouts pass the classes that match their UI profile, so the same markup
-    works for Tailwind, Bootstrap and plain CSS.
-
-    Usage:
-        @include('partials.brand', ['home_url' => '/'])
-        @include('partials.brand', ['variant' => 'mark'])
+    `public/logo.png` is the official lockup (mark + wordmark) and
+    `public/logo-mark.png` the mark alone, for tight spaces such as footers.
 --}}
-<a class="{{ class ?? 'brand' }}" href="{{ home_url ?? '/' }}" aria-label="SahilPHP home">
+<a class="{{ class ?? 'navbar-brand d-inline-flex align-items-center gap-2 m-0 py-0' }}"
+    href="{{ home_url ?? '/' }}" aria-label="SahilPHP home">
     @if ((variant ?? 'wordmark') == 'mark')
         <img class="brand__logo brand__logo--mark" src="{{ asset('logo-mark.png') }}" alt="SahilPHP"
             width="109" height="160" decoding="async">

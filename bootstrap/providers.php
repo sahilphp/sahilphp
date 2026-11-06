@@ -24,7 +24,7 @@ return [
     \App\Providers\ScheduleProvider::class,
     \App\Providers\MailProvider::class,
     \App\Providers\AssetProvider::class,
-    // Frontend provider injection point — each UI kit's `ui:setup` will
+    \Sahil\Firefiber\FirefiberServiceProvider::class,    // Frontend provider injection point — each UI kit's `ui:setup` will
     // inject the appropriate provider (Firefiber, React, Vue, Svelte, or None).
     \App\Providers\ViewProvider::class,
     \App\Providers\WebRoutesProvider::class,
