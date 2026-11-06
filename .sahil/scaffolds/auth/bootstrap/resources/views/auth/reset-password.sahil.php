@@ -14,7 +14,7 @@
         <div class="alert alert-success py-2 small" role="status">{{ status }}</div>
     @endif
 
-    <form method="post" action="/reset-password/{{ token ?? '' }}" novalidate>
+    <form method="post" action="/reset-password" novalidate>
         <input type="hidden" name="_token" value="{{ csrf_token }}">
         <input type="hidden" name="token" value="{{ token ?? '' }}">
 

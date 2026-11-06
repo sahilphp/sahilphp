@@ -17,7 +17,7 @@
             </div>
         @endif
 
-        <form class="space-y-4" method="post" action="/reset-password/{{ token ?? '' }}" novalidate>
+        <form class="space-y-4" method="post" action="/reset-password" novalidate>
             <input type="hidden" name="_token" value="{{ csrf_token }}">
             <input type="hidden" name="token" value="{{ token ?? '' }}">
 

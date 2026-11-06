@@ -57,7 +57,7 @@ final class WebRoutesProvider extends ServiceProvider
                     throw new RuntimeException(sprintf('routes/web.php is missing; expected it at [%s].', $file));
                 }
 
-                // Authentication pages are optional: a project that never ran
+                // Authentication routes are optional: a project that never ran
                 // `make:auth` boots with the web routes only.
                 continue;
             }

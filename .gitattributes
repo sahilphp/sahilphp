@@ -12,6 +12,7 @@
 /phpstan.neon.dist       export-ignore
 /.gitattributes          export-ignore
 /.gitignore              export-ignore
+/composer.json.backup    export-ignore
 
 # License: starter kit does NOT ship framework LICENSE into user project
 LICENSE                export-ignore

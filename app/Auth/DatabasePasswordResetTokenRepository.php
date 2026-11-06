@@ -10,10 +10,11 @@ use Sahil\Database\Connection;
 /**
  * Password reset tokens stored in `password_reset_tokens`.
  *
- * Tokens are kept as SHA-256 digests and stamped with a Unix `created_at`;
- * expiry is decided when a record is read, using the configured window.
- * Issuing a new token deletes the user's outstanding ones, so a reset link
- * works at most once and an older link stops working immediately.
+ * The table is keyed by email (one outstanding link per account). Tokens are
+ * kept as SHA-256 digests and stamped with a textual timestamp; expiry is
+ * decided when a record is read, using the configured window. Issuing a new
+ * token deletes the account's outstanding one, so a reset link works at most
+ * once and an older link stops working immediately.
  */
 final class DatabasePasswordResetTokenRepository implements PasswordResetTokenRepositoryContract
 {
@@ -25,19 +26,31 @@ final class DatabasePasswordResetTokenRepository implements PasswordResetTokenRe
 
     public function create(int|string $userId, string $token, int $expirationMinutes): void
     {
+        $email = $this->emailFor($userId);
+
+        if ($email === null) {
+            return;
+        }
+
         $this->deleteUserTokens($userId);
 
         $this->connection->table('password_reset_tokens')->insert([
-            'user_id' => $userId,
+            'email' => $email,
             'token' => self::digest($token),
-            'created_at' => time(),
+            'created_at' => gmdate('Y-m-d H:i:s'),
         ]);
     }
 
     public function find(int|string $userId, string $token): ?array
     {
+        $email = $this->emailFor($userId);
+
+        if ($email === null) {
+            return null;
+        }
+
         $row = $this->connection->table('password_reset_tokens')
-            ->where('user_id', '=', $userId)
+            ->where('email', '=', $email)
             ->where('token', '=', self::digest($token))
             ->first();
 
@@ -45,36 +58,65 @@ final class DatabasePasswordResetTokenRepository implements PasswordResetTokenRe
             return null;
         }
 
-        return ['created_at' => (int) $row['created_at']];
+        return ['created_at' => (string) ($row['created_at'] ?? '')];
     }
 
     public function isExpired(array $record): bool
     {
-        $expiresAt = (int) ($record['created_at'] ?? 0) + ($this->expirationMinutes * 60);
+        $createdAt = strtotime((string) ($record['created_at'] ?? ''));
 
-        return time() >= $expiresAt;
+        if ($createdAt === false) {
+            return true;
+        }
+
+        return time() >= $createdAt + ($this->expirationMinutes * 60);
     }
 
     public function delete(int|string $userId, string $token): void
     {
+        $email = $this->emailFor($userId);
+
+        if ($email === null) {
+            return;
+        }
+
         $this->connection->table('password_reset_tokens')
-            ->where('user_id', '=', $userId)
+            ->where('email', '=', $email)
             ->where('token', '=', self::digest($token))
             ->delete();
     }
 
     public function deleteUserTokens(int|string $userId): void
     {
+        $email = $this->emailFor($userId);
+
+        if ($email === null) {
+            return;
+        }
+
         $this->connection->table('password_reset_tokens')
-            ->where('user_id', '=', $userId)
+            ->where('email', '=', $email)
             ->delete();
     }
 
     public function deleteExpired(): void
     {
+        $cutoff = gmdate('Y-m-d H:i:s', time() - ($this->expirationMinutes * 60));
+
         $this->connection->table('password_reset_tokens')
-            ->where('created_at', '<', time() - ($this->expirationMinutes * 60))
+            ->where('created_at', '<', $cutoff)
             ->delete();
+    }
+
+    private function emailFor(int|string $userId): ?string
+    {
+        $row = $this->connection->table('users')->where('id', '=', $userId)->first();
+
+        if ($row === null || !isset($row['email']) || !is_string($row['email'])) {
+            return null;
+        }
+
+        return $row['email'];
     }
 
     private static function digest(string $token): string

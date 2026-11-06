@@ -1,5 +1,5 @@
 {
-    "name": "sahilphp/starter-kit",
+    "name": "sahilphp/sahilphp",
     "description": "A starter application for building projects with the SahilPHP framework.",
     "type": "project",
     "license": "MIT",
@@ -56,7 +56,8 @@
         "post-create-project-cmd": [
             "@php -r \"file_exists('.env') || copy('.env.example', '.env');\"",
             "@php bin/sahil key:generate",
-            "@php bin/sahil storage:prepare"
+            "@php bin/sahil storage:prepare",
+            "@php bin/sahil ui:setup"
         ]
     },
     "minimum-stability": "stable",

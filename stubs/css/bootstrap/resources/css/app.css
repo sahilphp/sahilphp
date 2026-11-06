@@ -1,0 +1,13 @@
+@import "bootstrap/dist/css/bootstrap.min.css";
+
+:root {
+  --bs-primary: #0b6fe8;
+  --bs-primary-rgb: 11, 111, 232;
+}
+
+.btn-primary {
+  --bs-btn-bg: #0b6fe8;
+  --bs-btn-border-color: #0b6fe8;
+  --bs-btn-hover-bg: #0958bb;
+  --bs-btn-hover-border-color: #0958bb;
+}

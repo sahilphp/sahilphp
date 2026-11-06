@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Providers;
 
+use RuntimeException;
 use App\Auth\DatabasePasswordResetTokenRepository;
 use App\Auth\UserRepository;
 use Sahil\Auth\AuthManager;
@@ -17,7 +18,9 @@ use Sahil\Auth\SessionAuthState;
 use Sahil\Container\Container;
 use Sahil\Contracts\Auth\PasswordResetTokenRepositoryContract;
 use Sahil\Contracts\Foundation\ApplicationContract;
+use Sahil\Database\Connection;
 use Sahil\Foundation\ServiceProvider;
+use Sahil\Orm\Model;
 
 /**
  * Wires the authentication and authorization layer.
@@ -36,12 +39,29 @@ final class AuthProvider extends ServiceProvider
 
         // Register database user provider
         $container->singleton(DatabaseUserProvider::class, static function (Container $container): DatabaseUserProvider {
-            $config = $container->make(ApplicationContract::class)->config();
-            $connection = $container->make(\Sahil\Database\Connection::class);
+            $application = $container->make(ApplicationContract::class);
+
+            if (!$application instanceof ApplicationContract) {
+                throw new RuntimeException('The application binding must resolve to the application contract.');
+            }
+
+            $config = $application->config();
+            $connection = $container->make(Connection::class);
+
+            if (!$connection instanceof Connection) {
+                throw new RuntimeException('The authentication database binding must resolve to a database connection.');
+            }
+
+            $model = (string) $config->get('auth.providers.users.model', \Sahil\Auth\SimpleUser::class);
+
+            if (is_a($model, Model::class, true)) {
+                $model::useConnection($connection);
+            }
 
             return new DatabaseUserProvider(
                 $connection,
-                (string) $config->get('auth.providers.users.table', 'users')
+                (string) $config->get('auth.providers.users.table', 'users'),
+                $model,
             );
         });
 
@@ -64,7 +84,7 @@ final class AuthProvider extends ServiceProvider
 
             // Set password options from config
             $manager->setPasswordOptions([
-                'algorithm' => (int) $config->get('auth.password.algorithm', PASSWORD_BCRYPT),
+                'algorithm' => $config->get('auth.password.algorithm', PASSWORD_BCRYPT),
                 'cost' => (int) $config->get('auth.password.cost', 12),
             ]);
 
@@ -81,8 +101,29 @@ final class AuthProvider extends ServiceProvider
         $container->singleton(EmailVerification::class, static fn (): EmailVerification => new EmailVerification());
 
         // Accounts: creation and lookup for the generated registration form.
-        $container->singleton(UserRepository::class, static fn (Container $container): UserRepository
-            => new UserRepository($container->make(\Sahil\Database\Connection::class)));
+        $container->singleton(UserRepository::class, static function (Container $container): UserRepository {
+            $application = $container->make(ApplicationContract::class);
+
+            if (!$application instanceof ApplicationContract) {
+                throw new RuntimeException('The application binding must resolve to the application contract.');
+            }
+
+            $connection = $container->make(Connection::class);
+
+            if (!$connection instanceof Connection) {
+                throw new RuntimeException('The authentication database binding must resolve to a database connection.');
+            }
+
+            $config = $application->config();
+
+            return new UserRepository(
+                $connection,
+                [
+                    'algorithm' => $config->get('auth.password.algorithm', PASSWORD_BCRYPT),
+                    'cost' => (int) $config->get('auth.password.cost', 12),
+                ],
+            );
+        });
 
         // Password reset: tokens live in the database, expire after the
         // configured window, and only their SHA-256 digest is stored.

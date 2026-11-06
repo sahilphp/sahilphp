@@ -46,10 +46,10 @@ the layout, navigation, welcome, error and example templates with that
 profile's versions. `GET /ui-kit` renders the example page that matches the
 active profile.
 
-## Authentication pages
+## Authentication views
 
-`php sahil make:auth` adds the templates behind `/login`, `/register`,
-`/forgot-password`, `/reset-password/{token}` and `/dashboard`:
+`php sahil make:auth` adds these templates and connects their forms to the
+generated server-side authentication routes:
 
 - `auth/login.sahil.php`, `auth/register.sahil.php`,
   `auth/forgot-password.sahil.php`, `auth/reset-password.sahil.php`;
@@ -58,8 +58,9 @@ active profile.
 - `pages/dashboard.sahil.php` — metrics, activity table and starter tasks.
 
 Tailwind projects receive shadcn/ui-style pages; Bootstrap projects receive a
-Bootstrap 5 design. The pages render demo data from `App\Http\AuthController`
-and do not authenticate anyone.
+Bootstrap 5 design. Login, registration and password-reset forms include CSRF
+tokens and render server-side validation feedback. The dashboard displays the
+authenticated account and posts logout to `/logout`.
 
 ## Assets
 

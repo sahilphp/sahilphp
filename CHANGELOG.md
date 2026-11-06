@@ -6,6 +6,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Fixed
+- `php sahil make:auth` now scaffolds the complete authentication system in one
+  command: `User` model, users/reset-token/sessions migrations, four auth
+  controllers, `Authenticate` / `RedirectIfAuthenticated` middleware,
+  `routes/auth.php`, and the auth/dashboard views. It also adds the auth route
+  require to `routes/web.php`, skips an existing users migration with a
+  warning, and runs `php -l` on every generated file.
+
+### Added
+- `php sahil ui:setup` installs exactly one UI kit and one CSS framework from
+  `stubs/ui-kits/` and `stubs/css/`, writes a package.json containing only the
+  chosen dependencies, and deletes `stubs/` afterwards.
+- `ui:setup` is wired into `post-create-project-cmd`, so
+  `composer create-project` asks the two setup questions automatically.
+
+### Changed
+- Project creation asks for the UI kit and then the CSS framework before any
+  file is written. The base starter-kit ships no installed UI kit or CSS
+  framework code.
+- The `sahilphp/firefiber`, `sahilphp/react`, `sahilphp/vue` and
+  `sahilphp/svelte` packages are libraries only; `composer create-project`
+  fails with a clear message.
+
 ## [1.0.0]
 
 ### Fixed

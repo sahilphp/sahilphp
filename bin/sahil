@@ -18,8 +18,9 @@ declare(strict_types=1);
  *   bin/sahil env:check           → documented environment variables
  *   bin/sahil key:generate        → write a new APP_KEY to .env
  *   bin/sahil storage:prepare     → create the writable storage directories
- *   bin/sahil make:auth [--ui=P]  → scaffold login/register/dashboard pages
+ *   bin/sahil make:auth [--ui=P]  → scaffold the authentication implementation
  *   bin/sahil start [--host=H] [--port=P] → run the development server
+ *   bin/sahil ui:setup [--ui-kit=K] [--css=C] → install one UI kit and CSS framework
  *   bin/sahil ui:install [profile] → install Tailwind/Bootstrap/plain UI assets
  *   bin/sahil ui:dev              → Vite development server
  *   bin/sahil ui:build            → production asset build
@@ -77,14 +78,16 @@ $printHelp = static function (int $exitCode = 0): never {
                             (names printed only; values are never shown).
           key:generate      Write a new APP_KEY to .env (--force replaces one).
           storage:prepare   Create the writable storage directories.
-          make:auth         Generate login, register, forgot-password,
-                            reset-password and dashboard pages for the
-                            installed UI profile (shadcn/ui style for
-                            Tailwind, Bootstrap 5 design for Bootstrap).
-                            Existing pages are kept unless --force is given.
+          make:auth         Generate the user model, migrations, controllers,
+                            middleware, routes, and authentication views for
+                            the installed UI profile. Existing files are kept
+                            unless --force is given.
           start             Run the PHP development server (default
                             127.0.0.1:8000). Alias: serve. A busy port
                             falls back to the next free port automatically.
+          ui:setup          Copy exactly one UI kit (Firefiber, React, Vue,
+                            Svelte or None) and one CSS framework (Tailwind v4
+                            or Bootstrap 5) from stubs/, then delete stubs/.
           ui:install        Install a frontend asset profile (Tailwind v4,
                             Bootstrap 5, both, or plain CSS).
           ui:dev            Run the Vite development server.
@@ -182,18 +185,16 @@ $printHelp = static function (int $exitCode = 0): never {
           port and prints both, so Composer never reports a raw
           "Address already in use" script error.
 
-        Authentication pages:
-          php sahil make:auth                     pages for the installed profile
+        Authentication scaffolding:
+          php sahil make:auth                     implementation for installed profile
           php sahil make:auth --ui=bootstrap      choose a profile explicitly
-          php sahil make:auth --force             replace pages that exist
+          php sahil make:auth --force             replace files that exist
           php sahil make:auth --dry-run           print the plan, write nothing
 
-          Generated: app/Http/AuthController.php, routes/auth.php and the
-          resources/views/{auth,layouts,partials,pages} templates behind
-          /login, /register, /forgot-password, /reset-password/{token} and
-          /dashboard. routes/auth.php is loaded automatically when it exists.
-          Pages render as-is; wire AuthManager and PasswordReset into
-          routes/auth.php to turn them into real accounts.
+          Includes the App\Models\User ORM model, users/reset-token migrations,
+          auth controllers and guest/auth middleware, registered routes, and
+          the resources/views templates for login, registration, password
+          reset and the protected dashboard.
 
         Status endpoints:
           GET /health      JSON health payload.
@@ -209,6 +210,15 @@ $flag = $args[0] ?? '--help';
 // UI commands are build tools: they need the project directory but not a
 // booted application (no config, database or service providers). Handling
 // them first keeps `ui:*` usable in a fresh or partially configured project.
+// `ui:setup` must work before Composer dependencies exist: the installer runs
+// it right after copying the starter-kit and before `composer install`. Its
+// class has no framework dependencies, so it is loaded directly.
+if ($flag === 'ui:setup') {
+    require_once __DIR__ . '/../app/Support/UiSetup.php';
+
+    exit((new \App\Support\UiSetup())->run(array_slice($args, 1), dirname(__DIR__)));
+}
+
 require_once __DIR__ . '/../vendor/autoload.php';
 
 if ($flag === 'new') {
@@ -290,11 +300,10 @@ if ($flag === 'make:auth') {
         }
     }
 
+    // `make:auth` must never leave a project half-wired: with no recorded
+    // profile, use the starter-kit's default Tailwind page set.
     if ($profile === null || $profile === \Sahil\Ui\Profile::None) {
-        fwrite(STDERR, "make:auth: no CSS framework profile detected in this project.\n");
-        fwrite(STDERR, "  install one first: php sahil ui:install tailwind   (or: bootstrap)\n");
-        fwrite(STDERR, "  or pick one now:   php sahil make:auth --ui=tailwind\n");
-        exit(1);
+        $profile = \Sahil\Ui\Profile::Tailwind;
     }
 
     try {
@@ -305,11 +314,9 @@ if ($flag === 'make:auth') {
         exit(1);
     }
 
-    fwrite(STDOUT, sprintf(
-        "%s authentication pages (%s profile).\n",
-        $dryRun ? 'Would generate' : 'Generated',
-        $report['profile']
-    ));
+    fwrite(STDOUT, $dryRun
+        ? sprintf("Would scaffold the authentication implementation (%s profile).\n", $report['profile'])
+        : "Auth scaffolding complete.\n");
 
     foreach ($report['created'] as $relative) {
         fwrite(STDOUT, sprintf("  created  %s\n", $relative));
@@ -320,18 +327,27 @@ if ($flag === 'make:auth') {
     }
 
     foreach ($report['skipped'] as $relative) {
-        fwrite(STDOUT, sprintf("  kept     %s (exists; --force replaces it)\n", $relative));
+        fwrite(STDOUT, sprintf("  skipped  %s (exists; --force overwrites it)\n", $relative));
+    }
+
+    foreach ($report['warnings'] as $warning) {
+        fwrite(STDOUT, sprintf("  warning  %s\n", $warning));
     }
 
     foreach ($report['backups'] as $relative) {
         fwrite(STDOUT, sprintf("  backup   %s\n", $relative));
     }
 
-    fwrite(STDOUT, "Pages: /login  /register  /forgot-password  /reset-password/{token}  /dashboard\n");
+    fwrite(STDOUT, "\nFiles created:\n");
+
+    foreach ($report['created'] as $relative) {
+        fwrite(STDOUT, sprintf("  %s\n", $relative));
+    }
 
     if (!$dryRun && ($report['created'] !== [] || $report['updated'] !== [])) {
-        fwrite(STDOUT, "Next: php sahil start, then open http://127.0.0.1:8000/login\n");
-        fwrite(STDOUT, "The pages render as-is; wire AuthManager and PasswordReset into routes/auth.php for real accounts.\n");
+        fwrite(STDOUT, "\nNext steps:\n");
+        fwrite(STDOUT, "  1. Run: php sahil migrate\n");
+        fwrite(STDOUT, "  2. Visit /register to create your first user.\n");
     }
 
     exit(0);

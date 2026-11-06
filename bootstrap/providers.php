@@ -9,7 +9,7 @@ declare(strict_types=1);
  * exactly the same providers on an isolated application instance without
  * booting the HTTP entry point.
  *
- * @return list<class-string<\Sahil\Foundation\ServiceProvider>>
+ * @return list<class-string<Sahil\Foundation\ServiceProvider>>
  */
 return [
     \App\Providers\ObservabilityProvider::class,
@@ -24,7 +24,9 @@ return [
     \App\Providers\ScheduleProvider::class,
     \App\Providers\MailProvider::class,
     \App\Providers\AssetProvider::class,
-    \Sahil\Firefiber\FirefiberServiceProvider::class,
+    // Frontend provider injection point — each UI kit's `ui:setup` will
+    // inject the appropriate provider (Firefiber, React, Vue, Svelte, or None).
+    \Sahil\Contracts\Foundation\ApplicationContract::class,
     \App\Providers\ViewProvider::class,
     \App\Providers\WebRoutesProvider::class,
     \App\Providers\CacheProvider::class,
