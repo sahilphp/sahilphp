@@ -339,7 +339,7 @@ final class UiSetup
 
         $insert = '';
         if ($uiKit === 'firefiber') {
-            $insert = $firefighter;
+            $insert = "    \\Sahil\\Firefiber\\FirefiberServiceProvider::class,";
         } elseif ($uiKit === 'react' || $uiKit === 'svelte') {
             $insert = "    \\App\\Providers\\FrontendServiceProvider::class,
 ";
