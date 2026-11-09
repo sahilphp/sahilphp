@@ -31,7 +31,7 @@ APP_DEBUG=false
 - Keep `.env` outside source control (it already is — `.env` is
   git-ignored) and restrict its filesystem permissions to the service user
   (`chmod 600 .env`).
-- `bin/sahil config:show` prints every key with `password` values as
+- `php sahil config:show` prints every key with `password` values as
   `[redacted]`; use it instead of cat-ing config in shared shells.
 
 ### 2. Transport and session cookies
@@ -121,7 +121,7 @@ composer install --no-dev --optimize-autoloader   # no dev tooling in prod
 composer check                                    # lint + tests + phpstan
 
 # One gated runner, not every instance at boot:
-bin/sahil migrate --force
+php sahil migrate --force
 ```
 
 ## Verifying a deployment

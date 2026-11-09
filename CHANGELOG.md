@@ -40,9 +40,9 @@ First public release.
 
 ### Added
 
-- `php bin/sahil key:generate` — writes a 32-byte `APP_KEY` to `.env`
+- `php sahil key:generate` — writes a 32-byte `APP_KEY` to `.env`
   (`--force` replaces an existing key).
-- `php bin/sahil storage:prepare` — creates the writable storage tree.
+- `php sahil storage:prepare` — creates the writable storage tree.
 - `composer create-project` hooks that copy `.env.example` to `.env`,
   generate the app key and prepare storage in one step.
 - `App\Providers\EncryptionProvider` binding `Sahil\Encryption\Encrypter`

@@ -47,13 +47,13 @@ files require a separate, approved remediation.
 | `composer analyse` (PHPStan) | **Fail**: 103 errors | 1 | 64 errors are in `src/Console` |
 | `composer check-style` (PHP-CS-Fixer) | **Fail**: 6 of 372 files need changes | 8 | Dry run, no files changed |
 | Clean Composer install | Pass: 14 runtime packages installed | 0 | Archive of `HEAD`, no `.env` |
-| Clean CLI boot | Pass: `php bin/sahil about` reports booted | 0 | `app name: SahilPHP`, `booted: yes` |
+| Clean CLI boot | Pass: `php sahil about` reports booted | 0 | `app name: SahilPHP`, `booted: yes` |
 | Clean HTTP boot | **Fail**: `/health` → 500, `/no-such-page` → 500 | — | `public/index.php` does not dispatch |
 | Direct kernel request | Pass: `/health` → 200 JSON | 0 | Proves the kernel/routing path works |
 | Fresh `npm ci` | Pass: 43 packages installed | 0 | Separate clean copy |
 | `npm run build` | Pass, with CSS warnings | 0 | Emits `dist/assets/app.css`, not `public/build` |
 | `npm run build:bootstrap` | Pass | 0 | Writes `public/build/assets/bootstrap-*.css/js` |
-| `php bin/sahil ui:status --json` | **Fail**: profile says `both`; required sources/assets missing | 1 | `ok: false` |
+| `php sahil ui:status --json` | **Fail**: profile says `both`; required sources/assets missing | 1 | `ok: false` |
 | Packagist `sahilphp/framework` | Not published | — | HTTP 404 |
 | Packagist `sahilphp/app` | Not published | — | HTTP 404 |
 | Packagist `sahilphp/installer` | Not published | — | HTTP 404 |
@@ -74,7 +74,7 @@ composer install --no-interaction --no-dev --prefer-dist
 
 Result: **success**, 14 packages installed from `composer.lock`.
 
-`php bin/sahil about` then succeeded:
+`php sahil about` then succeeded:
 
 ```text
 app name:     SahilPHP
@@ -224,7 +224,7 @@ the orphaned legacy console layer:
 
 Of the 103 errors, **64 are under `src/Console`**. `src/Console/Application.php`
 extends the final `Sahil\Foundation\Application` and accesses its private
-`$container`. `bin/sahil` does not use `Sahil\Console`; it uses the separate
+`$container`. `sahil` does not use `Sahil\Console`; it uses the separate
 command dispatch in the CLI entry point and `Sahil\Ui\UiConsole`. This layer
 appears to be dead and should be removed or rewritten.
 
@@ -622,7 +622,7 @@ A release should not be tagged until all of these are true:
       `composer check-style` pass.
 - [ ] PHPUnit has 0 errors/failures on the supported matrix (or a documented,
       approved skip policy).
-- [ ] Clean CLI boot: `php bin/sahil about` and `php bin/sahil --version`.
+- [ ] Clean CLI boot: `php sahil about` and `php sahil --version`.
 - [ ] Clean HTTP boot: `/health` returns 200; an unknown path returns 404;
       static assets are served.
 - [ ] Application skeleton boots from `vendor/sahilphp/framework`; test base
@@ -666,12 +666,12 @@ composer check-style
 
 git archive HEAD | tar -x -C "$AUDIT_DIR"
 composer install --no-interaction --no-dev --prefer-dist
-php bin/sahil about
+php sahil about
 php -S 127.0.0.1:8932 public/index.php
 curl -i http://127.0.0.1:8932/health
 curl -i http://127.0.0.1:8932/no-such-page
 php -r '...direct Kernel /health request...'
-php bin/sahil ui:status --json
+php sahil ui:status --json
 npm ci --no-audit --no-fund
 npm run build
 npm run build:bootstrap

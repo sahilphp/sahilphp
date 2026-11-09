@@ -41,7 +41,7 @@ final class UiSetupCommandTest extends TestCase
         $root = dirname(__DIR__, 2);
         $pipes = [];
         $process = proc_open(
-            [PHP_BINARY, $root . '/bin/sahil', 'ui:setup', '--path=' . $this->project, ...$options],
+            [PHP_BINARY, $root . '/sahil', 'ui:setup', '--path=' . $this->project, ...$options],
             [1 => ['pipe', 'w'], 2 => ['pipe', 'w']],
             $pipes,
             $root,
@@ -78,8 +78,10 @@ final class UiSetupCommandTest extends TestCase
         self::assertDirectoryDoesNotExist($this->project . '/stubs');
         self::assertFileExists($this->project . '/resources/js/App.jsx');
         self::assertFileExists($this->project . '/resources/js/app.js');
-        self::assertFileExists($this->project . '/resources/css/app.css');
+        self::assertFileExists($this->project . '/resources/css/tailwind.css');
+        self::assertFileDoesNotExist($this->project . '/resources/css/app.css');
         self::assertFileExists($this->project . '/resources/views/layouts/app.sahil.php');
+        self::assertStringContainsString("@asset_js('kit')", (string) file_get_contents($this->project . '/resources/views/layouts/app.sahil.php'));
         self::assertFileDoesNotExist($this->project . '/resources/js/App.vue');
         self::assertFileDoesNotExist($this->project . '/resources/js/App.svelte');
 
@@ -94,6 +96,8 @@ final class UiSetupCommandTest extends TestCase
         $vite = (string) file_get_contents($this->project . '/vite.config.js');
         self::assertStringContainsString('react()', $vite);
         self::assertStringContainsString('tailwindcss()', $vite);
+        self::assertStringContainsString("kit: 'resources/js/app.js'", $vite);
+        self::assertStringContainsString("tailwind: 'resources/css/tailwind.css'", $vite);
 
         $manifest = json_decode((string) file_get_contents($this->project . '/.sahil-ui.json'), true);
         self::assertSame(['profile' => 'tailwind', 'ui_kit' => 'react'], $manifest);
@@ -106,6 +110,9 @@ final class UiSetupCommandTest extends TestCase
         self::assertSame(0, $code, $stdout . $stderr);
         self::assertFileExists($this->project . '/resources/js/App.vue');
         self::assertFileDoesNotExist($this->project . '/resources/js/App.jsx');
+        self::assertFileExists($this->project . '/resources/css/bootstrap.css');
+        self::assertFileExists($this->project . '/resources/js/bootstrap.js');
+        self::assertFileDoesNotExist($this->project . '/resources/css/tailwind.css');
 
         $package = $this->package();
         self::assertArrayHasKey('vue', $package['dependencies'] ?? []);
@@ -169,6 +176,8 @@ final class UiSetupCommandTest extends TestCase
         self::assertSame(0, $code, $stdout . $stderr);
         self::assertStringContainsString('using [none]', $stdout);
         self::assertStringContainsString('using [tailwind]', $stdout);
+        self::assertFileExists($this->project . '/resources/css/tailwind.css');
+        self::assertFileDoesNotExist($this->project . '/resources/css/app.css');
         self::assertArrayHasKey('@tailwindcss/vite', $this->package()['devDependencies'] ?? []);
     }
 

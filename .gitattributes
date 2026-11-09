@@ -4,6 +4,7 @@
 /scripts                 export-ignore
 /.github                 export-ignore
 /.sahil-ui.json          export-ignore
+# .sahil/scaffolds must ship: `php sahil unda:auth` reads it from the installed app.
 /CHANGELOG.md            export-ignore
 /CODE_OF_CONDUCT.md      export-ignore
 /CONTRIBUTING.md         export-ignore
@@ -12,7 +13,16 @@
 /phpstan.neon.dist       export-ignore
 /.gitattributes          export-ignore
 /.gitignore              export-ignore
+/bin                     export-ignore
 /composer.json.backup    export-ignore
+/composer.lock           export-ignore
+/dist                    export-ignore
+/node_modules            export-ignore
+/package-lock.json       export-ignore
+/public/build            export-ignore
+/starter-kit             export-ignore
+/.phpunit.cache          export-ignore
+/vendor                  export-ignore
 
 # License: starter kit does NOT ship framework LICENSE into user project
 LICENSE                export-ignore

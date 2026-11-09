@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace Tests\Support;
 
-use App\Support\EnvironmentFile;
+use Sahil\Support\EnvironmentFile;
 use PHPUnit\Framework\TestCase;
 
 /**
- * @covers \App\Support\EnvironmentFile
+ * @covers \Sahil\Support\EnvironmentFile
  */
 final class EnvironmentFileTest extends TestCase
 {

@@ -16,8 +16,8 @@ git clone https://github.com/sahilphp/starter-kit.git
 cd starter-kit
 composer install
 cp .env.example .env
-php bin/sahil key:generate
-php bin/sahil storage:prepare
+php sahil key:generate
+php sahil storage:prepare
 composer start
 ```
 
@@ -39,7 +39,7 @@ composer test        # PHPUnit (application suite)
 composer validate --strict
 ```
 
-Optional frontend checks: `npm ci && php bin/sahil ui:status`.
+Optional frontend checks: `npm ci && php sahil ui:status`.
 
 ## Pull requests
 
@@ -53,7 +53,7 @@ Optional frontend checks: `npm ci && php bin/sahil ui:status`.
 ## Reporting bugs and vulnerabilities
 
 Bugs: open a GitHub issue with a minimal reproduction (include
-`php bin/sahil about` output).
+`php sahil about` output).
 Security issues: **do not** open a public issue — follow `SECURITY.md`.
 
 ## License

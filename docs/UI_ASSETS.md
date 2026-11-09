@@ -3,7 +3,7 @@
 **Status:** Frontend integration Phases 5–7.
 **Commands:** `ui:install`, `ui:dev`, `ui:build`, `ui:status`, `ui:theme`.
 **Implementation:** `Sahil\Ui\*` (`src/Ui/`) and `Sahil\Theme\*`
-(`src/Theme/`), wired into `bin/sahil`.
+(`src/Theme/`), wired into `php sahil`.
 **Runtime tags:** see [`VIEW_ASSETS.md`](VIEW_ASSETS.md) for the asset manager
 and the `@asset_css`, `@asset_js` and `asset()` template helpers.
 **Optional theming:** see [`THEMING.md`](THEMING.md) for neutral theme tokens,
@@ -43,11 +43,11 @@ anyway; the report still contains actionable prerequisite guidance.
 ## 2. Command reference
 
 ```text
-bin/sahil ui:install [profile] [options]
-bin/sahil ui:dev     [options]
-bin/sahil ui:build   [options]
-bin/sahil ui:status  [options]
-bin/sahil ui:theme   [profile] [options]
+php sahil ui:install [profile] [options]
+php sahil ui:dev     [options]
+php sahil ui:build   [options]
+php sahil ui:status  [options]
+php sahil ui:theme   [profile] [options]
 ```
 
 ### Options
@@ -170,10 +170,10 @@ and override files are preserved. The command requires `ui:install` first,
 does not install packages and does not build assets.
 
 ```bash
-php bin/sahil ui:theme
-php bin/sahil ui:theme --source=theme/brand.json
-php bin/sahil ui:theme --dry-run --json
-php bin/sahil ui:build
+php sahil ui:theme
+php sahil ui:theme --source=theme/brand.json
+php sahil ui:theme --dry-run --json
+php sahil ui:build
 ```
 
 See [`THEMING.md`](THEMING.md) for the JSON format, mapping rules, dark-mode
@@ -287,10 +287,10 @@ Exit codes:
 CI example:
 
 ```bash
-php bin/sahil ui:install both --no-install   # deterministic file check
+php sahil ui:install both --no-install   # deterministic file check
 npm install
-php bin/sahil ui:build
-php bin/sahil ui:status --json
+php sahil ui:build
+php sahil ui:status --json
 ```
 
 ---
@@ -316,29 +316,29 @@ project root.
 
 ```bash
 # Fresh Tailwind v4 project, dependencies installed
-php bin/sahil ui:install tailwind
-php bin/sahil ui:build
-php bin/sahil ui:status
+php sahil ui:install tailwind
+php sahil ui:build
+php sahil ui:status
 
 # Existing Bootstrap app with custom Vite config and package.json
-php bin/sahil ui:install bootstrap --merge
-php bin/sahil ui:status
+php sahil ui:install bootstrap --merge
+php sahil ui:status
 
 # Replace a conflicting generated config (backup is kept)
-php bin/sahil ui:install both --overwrite
+php sahil ui:install both --overwrite
 
 # Inspect a plan without touching the filesystem
-php bin/sahil ui:install none --dry-run
+php sahil ui:install none --dry-run
 
 # Generate an optional theme for the recorded profile
-php bin/sahil ui:theme
-php bin/sahil ui:theme --source=theme/brand.json
+php sahil ui:theme
+php sahil ui:theme --source=theme/brand.json
 
 # Develop on another port
-php bin/sahil ui:dev --host=127.0.0.1 --port=5199
+php sahil ui:dev --host=127.0.0.1 --port=5199
 
 # Build another checkout from this installation
-php bin/sahil ui:build --path=/srv/apps/example
+php sahil ui:build --path=/srv/apps/example
 ```
 
 ---
@@ -353,11 +353,11 @@ php bin/sahil ui:build --path=/srv/apps/example
 | `Missing frontend prerequisites` on install | Install the tools, or use `--no-install` and install later |
 | `existing file(s) differ` | Inspect the list, then re-run with `--merge` or `--overwrite` |
 | `package.json is not valid JSON` | Fix the JSON, or `--overwrite` to replace it (backup kept) |
-| `Frontend dependencies are not installed` | Run `bin/sahil ui:install` or `<pm> install` |
-| `Missing build output(s)` in status | Run `bin/sahil ui:build` |
-| `Build output is older than the source` | Rebuild with `bin/sahil ui:build` |
+| `Frontend dependencies are not installed` | Run `php sahil ui:install` or `<pm> install` |
+| `Missing build output(s)` in status | Run `php sahil ui:build` |
+| `Build output is older than the source` | Rebuild with `php sahil ui:build` |
 | `build succeeded but expected output is missing` | A custom `vite.config.js` changed asset names; align them with the profile or reinstall with `--overwrite` |
-| `Cannot add theme imports` | Run `bin/sahil ui:install <profile>` first; `ui:theme` only edits existing profile entry files |
+| `Cannot add theme imports` | Run `php sahil ui:install <profile>` first; `ui:theme` only edits existing profile entry files |
 | `Theme source [...] was not found` | Check `--source`, or omit it to use/create `theme/tokens.json` |
 | `not valid JSON` or an invalid token error | Fix the source file; validation happens before any generated file is written |
 | Vite dev server port is busy | Nothing to do: `ui:dev` uses the next free port and records it in `public/hot`; `--port=N` only sets the first port to try |
@@ -376,7 +376,7 @@ php bin/sahil ui:build --path=/srv/apps/example
   overwrite backups, dry-run, idempotency and invalid manifests in temporary
   projects.
 - `tests/Ui/UiStatusTest.php` — inference, missing assets, stale assets.
-- `tests/Console/UiCommandsTest.php` — end-to-end `bin/sahil` exit codes and
+- `tests/Console/UiCommandsTest.php` — end-to-end `php sahil` exit codes and
   output.
 - `tests/Console/UiBuildIntegrationTest.php` — real Vite builds in temporary
   projects, including themed builds for every profile. Skipped automatically

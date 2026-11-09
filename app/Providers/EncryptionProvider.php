@@ -15,7 +15,7 @@ use Sahil\Foundation\ServiceProvider;
  * The binding is lazy: an application without a key still boots and serves
  * pages, and only resolving `Encrypter` reports that the key is missing. The
  * configured value comes from `config/app.php` (`key`, read from `APP_KEY`),
- * and `bin/sahil key:generate` writes it.
+ * and `php sahil key:generate` writes it.
  *
  * Usage: `$app->container()->make(Encrypter::class)` then
  * `encryptString()`/`decryptString()` for confidential values, or

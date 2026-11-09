@@ -42,7 +42,7 @@ final class WebRoutesProvider extends ServiceProvider
     }
 
     /**
-     * Build the route table from `routes/web.php` and, when `make:auth` has
+     * Build the route table from `routes/web.php` and, when `unda:auth` has
      * generated it, `routes/auth.php`. Both files return route lists.
      */
     private function routeTable(): Router
@@ -58,7 +58,7 @@ final class WebRoutesProvider extends ServiceProvider
                 }
 
                 // Authentication routes are optional: a project that never ran
-                // `make:auth` boots with the web routes only.
+                // `unda:auth` boots with the web routes only.
                 continue;
             }
 

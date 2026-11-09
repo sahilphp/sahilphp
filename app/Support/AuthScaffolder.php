@@ -12,7 +12,7 @@ use RecursiveIteratorIterator;
 use SplFileInfo;
 
 /**
- * Writes the authentication implementation produced by `php sahil make:auth`.
+ * Writes the authentication implementation produced by `php sahil unda:auth`.
  *
  * The sources live in the hidden, internal `.sahil/scaffolds/auth` directory
  * (kept out of `stubs/`, which project creation and `ui:setup` delete, and

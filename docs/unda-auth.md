@@ -1,14 +1,17 @@
-# Authentication scaffolding (`php sahil make:auth`)
+# Authentication scaffolding (`php sahil unda:auth`)
 
-`make:auth` installs a complete, working session-authentication system in one
+`unda:auth` installs a complete, working session-authentication system in one
 command. Nothing has to be wired by hand afterwards.
 
+> **Compatibility:** `make:auth` remains available as a hidden alias for this
+> command. Use `unda:auth` in new projects and documentation.
+
 ```bash
-php sahil make:auth                    # complete implementation
-php sahil make:auth --ui=bootstrap     # choose the page style
-php sahil make:auth --force            # overwrite managed files (backups kept)
-php sahil make:auth --dry-run          # print the plan, write nothing
-php sahil make:auth --path=/path/app   # scaffold another checkout
+php sahil unda:auth                    # complete implementation
+php sahil unda:auth --ui=bootstrap     # choose the page style
+php sahil unda:auth --force            # overwrite managed files (backups kept)
+php sahil unda:auth --dry-run          # print the plan, write nothing
+php sahil unda:auth --path=/path/app   # scaffold another checkout
 ```
 
 The template extension is detected from `resources/views` (`.sahil.php`,
@@ -70,7 +73,7 @@ signs the user in.
 - `POST /logout` behind `Authenticate`
 - `GET /dashboard` behind `Authenticate`
 
-`make:auth` also adds `require __DIR__.'/auth.php';` to `routes/web.php` only
+`unda:auth` also adds `require __DIR__.'/auth.php';` to `routes/web.php` only
 when that reference is not already present.
 
 ### Views
@@ -97,7 +100,7 @@ and the view.
 
 To customise the starting point for future projects, edit the sources under
 `.sahil/scaffolds/auth/` (`shared/` for PHP, `tailwind/` and `bootstrap/` for
-views). `make:auth` copies those trees verbatim (renaming the detected view
+views). `unda:auth` copies those trees verbatim (renaming the detected view
 extension) and runs the same lint/skip/backup logic.
 
 Add `email_verified_at` handling by writing the timestamp after registration

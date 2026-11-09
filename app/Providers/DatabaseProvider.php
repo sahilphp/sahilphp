@@ -25,7 +25,7 @@ use Sahil\Migrations\SeederRunner;
  * services.
  *
  * Everything is registered as a LAZY singleton closure, so nothing connects
- * at boot: `bin/sahil about` and HTTP requests that never touch the database
+ * at boot: `php sahil about` and HTTP requests that never touch the database
  * keep working when the server is down or unconfigured. The connection is
  * established the first time it is actually resolved, and any resolution
  * failure surfaces as a `ConnectionException` (never a half-built service).

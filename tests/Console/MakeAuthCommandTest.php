@@ -7,7 +7,7 @@ namespace Tests\Console;
 use PHPUnit\Framework\TestCase;
 
 /**
- * `make:auth` writes the complete auth implementation in one command.
+ * `unda:auth` (and its `make:auth` compatibility alias) writes the complete auth implementation in one command.
  *
  * Every test runs the real CLI against a temporary project directory, so the
  * assertions cover the files a user receives, not an in-memory plan.
@@ -51,7 +51,7 @@ final class MakeAuthCommandTest extends TestCase
         $root = dirname(__DIR__, 2);
         $pipes = [];
         $process = proc_open(
-            [PHP_BINARY, $root . '/bin/sahil', 'make:auth', '--path=' . $this->project, ...$options],
+            [PHP_BINARY, $root . '/sahil', 'make:auth', '--path=' . $this->project, ...$options],
             [1 => ['pipe', 'w'], 2 => ['pipe', 'w']],
             $pipes,
             $root,

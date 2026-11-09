@@ -9,7 +9,7 @@ return [
     'name' => env('APP_NAME', 'SahilPHP'),
     'framework' => 'SahilPHP',
     // Encryption and signing key (`base64:` + 32 random bytes). Generate one
-    // with `php bin/sahil key:generate`; never commit a real value.
+    // with `php sahil key:generate`; never commit a real value.
     'key' => env('APP_KEY'),
     'environment' => env('APP_ENV', 'development'),
     'debug' => env('APP_DEBUG', false),

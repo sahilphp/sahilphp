@@ -331,7 +331,7 @@ page-specific files in `head` / `scripts` sections:
 ```
 
 The active profile comes from `.sahil-ui.json` (written by
-`bin/sahil ui:install`), with `ASSET_PROFILE` as an override. A Tailwind-only
+`php sahil ui:install`), with `ASSET_PROFILE` as an override. A Tailwind-only
 installation cannot request Bootstrap, so the framework never loads both CSS
 frameworks implicitly. See [Views & Asset Integration](VIEW_ASSETS.md) for
 configuration, sample layouts and the complete helper reference.

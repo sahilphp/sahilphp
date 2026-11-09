@@ -11,7 +11,7 @@ use PHPUnit\Framework\TestCase;
  *
  * `key:generate` and `storage:prepare` run before the application boots, so
  * they are exercised the same way `composer create-project` runs them: through
- * `bin/sahil` in a directory that only has `.env.example`.
+ * `sahil` in a directory that only has `.env.example`.
  */
 final class ProjectSetupCommandsTest extends TestCase
 {
@@ -54,7 +54,7 @@ final class ProjectSetupCommandsTest extends TestCase
         $root = dirname(__DIR__, 2);
         $pipes = [];
         $process = proc_open(
-            [PHP_BINARY, $root . '/bin/sahil', $command, '--path=' . $this->project],
+            [PHP_BINARY, $root . '/sahil', $command, '--path=' . $this->project],
             [1 => ['pipe', 'w'], 2 => ['pipe', 'w']],
             $pipes,
             $root,
@@ -102,7 +102,7 @@ final class ProjectSetupCommandsTest extends TestCase
         $pipes = [];
         $root = dirname(__DIR__, 2);
         $process = proc_open(
-            [PHP_BINARY, $root . '/bin/sahil', 'key:generate', '--force', '--path=' . $this->project],
+            [PHP_BINARY, $root . '/sahil', 'key:generate', '--force', '--path=' . $this->project],
             [1 => ['pipe', 'w'], 2 => ['pipe', 'w']],
             $pipes,
             $root,

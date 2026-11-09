@@ -9,7 +9,7 @@ use PHPUnit\Framework\TestCase;
 final class SahilCliTest extends TestCase
 {
     /**
-     * Boot the real application through bin/sahil in an isolated PHP
+     * Boot the real application through sahil in an isolated PHP
      * process (so the per-process Application handle does not clash).
      *
      * @return array{0: int, 1: string}
@@ -18,7 +18,7 @@ final class SahilCliTest extends TestCase
     {
         $command = array_map(
             'escapeshellarg',
-            [PHP_BINARY, __DIR__.'/../../bin/sahil', ...$arguments]
+            [PHP_BINARY, __DIR__.'/../../sahil', ...$arguments]
         );
 
         $pipes = [];

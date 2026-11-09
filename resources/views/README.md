@@ -29,7 +29,7 @@ looks finished before any code is written. The asset files are:
 - `layouts/app.sahil.php` — plain-profile layout: brand stylesheet, favicon
   set, navigation and footer;
 - `layouts/auth.sahil.php`, `layouts/dashboard.sahil.php` — added by
-  `php sahil make:auth` (don't exist until you generate them);
+  `php sahil unda:auth` (don't exist until you generate them);
 - `partials/brand.sahil.php` — the logo links described above;
 - `partials/nav.sahil.php` — shared navigation that renders the brand and
   accepts framework class names as data;
@@ -48,7 +48,7 @@ active profile.
 
 ## Authentication views
 
-`php sahil make:auth` adds these templates and connects their forms to the
+`php sahil unda:auth` adds these templates and connects their forms to the
 generated server-side authentication routes:
 
 - `auth/login.sahil.php`, `auth/register.sahil.php`,

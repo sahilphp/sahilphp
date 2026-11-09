@@ -21,7 +21,7 @@ final class StartCommandTest extends TestCase
         $root = dirname(__DIR__, 2);
         $pipes = [];
         $process = proc_open(
-            [PHP_BINARY, $root . '/bin/sahil', 'start', ...$arguments],
+            [PHP_BINARY, $root . '/sahil', 'start', ...$arguments],
             [1 => ['pipe', 'w'], 2 => ['pipe', 'w']],
             $pipes,
             $root,
@@ -49,7 +49,7 @@ final class StartCommandTest extends TestCase
         $root = dirname(__DIR__, 2);
         $pipes = [];
         $process = proc_open(
-            [PHP_BINARY, $root . '/bin/sahil', 'start', ...$arguments],
+            [PHP_BINARY, $root . '/sahil', 'start', ...$arguments],
             [1 => ['pipe', 'w'], 2 => ['pipe', 'w']],
             $pipes,
             $root,

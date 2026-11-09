@@ -23,9 +23,9 @@ The theme layer is opt-in:
 ## 1. Quick start
 
 ```bash
-php bin/sahil ui:install tailwind     # or bootstrap / both / none
-php bin/sahil ui:theme                # reads theme/tokens.json
-php bin/sahil ui:build
+php sahil ui:install tailwind     # or bootstrap / both / none
+php sahil ui:theme                # reads theme/tokens.json
+php sahil ui:build
 ```
 
 On the first run, if `theme/tokens.json` does not exist, `ui:theme` writes the
@@ -33,29 +33,29 @@ neutral sample theme. Edit it and run `ui:theme` again:
 
 ```bash
 $EDITOR theme/tokens.json
-php bin/sahil ui:theme
-php bin/sahil ui:build
+php sahil ui:theme
+php sahil ui:build
 ```
 
 Use a different token file without creating `theme/tokens.json`:
 
 ```bash
-php bin/sahil ui:theme --source=theme/brand.json
+php sahil ui:theme --source=theme/brand.json
 ```
 
 The profile is resolved from `.sahil-ui.json` exactly like `ui:build`. An
 explicit profile is also accepted:
 
 ```bash
-php bin/sahil ui:theme bootstrap
-php bin/sahil ui:theme --profile=both --source=theme/brand.json
+php sahil ui:theme bootstrap
+php sahil ui:theme --profile=both --source=theme/brand.json
 ```
 
 Inspect the plan without writing:
 
 ```bash
-php bin/sahil ui:theme --dry-run
-php bin/sahil ui:theme --json
+php sahil ui:theme --dry-run
+php sahil ui:theme --json
 ```
 
 ---
@@ -378,7 +378,7 @@ compile Bootstrap from Sass instead of the precompiled distribution:
    Or add the SCSS file as the Vite input and remove the CSS import from the
    JavaScript entry.
 
-4. Run `php bin/sahil ui:build`.
+4. Run `php sahil ui:build`.
 
 Import order matters: Sass variables are resolved with `!default`, so the
 theme file must come before `bootstrap/scss/bootstrap`. The generated file
@@ -418,7 +418,7 @@ There are two supported override paths.
 Edit `theme/tokens.json` and run:
 
 ```bash
-php bin/sahil ui:theme
+php sahil ui:theme
 ```
 
 This regenerates every framework file from the shared tokens. It is the
@@ -505,7 +505,7 @@ generated CSS variables, not a cross-framework component runtime.
 ## 10. Command reference
 
 ```text
-bin/sahil ui:theme [profile] [options]
+php sahil ui:theme [profile] [options]
 ```
 
 | Option | Meaning |

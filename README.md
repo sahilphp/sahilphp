@@ -48,7 +48,7 @@ See the [PHP documentation](https://www.php.net/) for installation instructions.
 - **PHP 8.4+** (this kit's `composer.json` requires `^8.4`)
 - **Composer 2.x**
 - **Node.js 20.19+ or 22.12+ with npm** — only for the optional frontend
-  asset commands (`npm run dev`, `bin/sahil ui:build`). The PHP application
+  asset commands (`npm run dev`, `php sahil ui:build`). The PHP application
   boots without Node.
 - A writable `storage/` directory (it ships with `.gitkeep` files)
 - Optional: MySQL or PostgreSQL when you outgrow the built-in SQLite default
@@ -64,8 +64,8 @@ cd my-app
 dependencies, then runs three hooks:
 
 1. `.env.example` is copied to `.env` (skipped when `.env` already exists);
-2. `php bin/sahil key:generate` writes a unique `APP_KEY`;
-3. `php bin/sahil storage:prepare` creates the writable storage tree.
+2. `php sahil key:generate` writes a unique `APP_KEY`;
+3. `php sahil storage:prepare` creates the writable storage tree.
 
 No `.env` file is strictly required: the application boots with the
 documented defaults (`APP_ENV=development`, `APP_DEBUG=false`, UTC). Copy the
@@ -73,7 +73,7 @@ template yourself when you need database, mail, session or asset overrides:
 
 ```bash
 cp .env.example .env
-php bin/sahil key:generate      # writes APP_KEY; --force replaces an existing key
+php sahil key:generate      # writes APP_KEY; --force replaces an existing key
 ```
 
 ### Creating a project with the installer
@@ -82,7 +82,7 @@ The starter-kit also contains a guided installer, so a checkout can create
 another application without publishing anything first:
 
 ```bash
-php bin/sahil new my-app
+php sahil new my-app
 ```
 
 The installer asks for the project name and then for exactly one UI framework:
@@ -102,9 +102,9 @@ Non-interactive use is supported for automation and CI. A UI choice is
 mandatory in that mode; the installer never falls back to installing both:
 
 ```bash
-php bin/sahil new my-app --ui=tailwind --no-interaction
-php bin/sahil new my-app --path=/tmp/my-app --ui=bootstrap --no-interaction
-php bin/sahil new my-app --ui=tailwind --no-install --no-interaction
+php sahil new my-app --ui=tailwind --no-interaction
+php sahil new my-app --path=/tmp/my-app --ui=bootstrap --no-interaction
+php sahil new my-app --ui=tailwind --no-install --no-interaction
 ```
 
 | Option | Meaning |
@@ -138,11 +138,11 @@ composer update sahilphp/framework
 Verify the application boots (no database required):
 
 ```bash
-php bin/sahil about
-php bin/sahil --version
-php bin/sahil env:check        # lists known variables; never prints values
-php bin/sahil key:generate     # only needed when .env has no APP_KEY yet
-php bin/sahil storage:prepare  # create any missing storage directories
+php sahil about
+php sahil --version
+php sahil env:check        # lists known variables; never prints values
+php sahil key:generate     # only needed when .env has no APP_KEY yet
+php sahil storage:prepare  # create any missing storage directories
 ```
 
 Start the development server from the project root:
@@ -155,7 +155,7 @@ composer start -- --port=8088      # the same command through Composer
 ```
 
 `php sahil <command>` runs every CLI command without the `bin/` prefix;
-`php bin/sahil start` is the identical command. When the port is already taken,
+`php sahil start` is the identical command. When the port is already taken,
 `start` moves to the next free port and prints both, so `composer start` never
 fails with a raw "Address already in use" error.
 
@@ -214,7 +214,7 @@ development and production.
 
 ```bash
 npm ci
-npm run dev                    # or: php bin/sahil ui:dev
+npm run dev                    # or: php sahil ui:dev
 ```
 
 In development the layouts read `public/hot`, the file `ui:dev` writes with the
@@ -227,7 +227,7 @@ are unstyled.
 
 ```bash
 npm ci
-php bin/sahil ui:build --clean
+php sahil ui:build --clean
 APP_ENV=production php sahil start
 ```
 
@@ -238,7 +238,7 @@ serving with `APP_ENV=production`**; otherwise `/` and `/ui-kit` return a safe
 Check the frontend state at any time:
 
 ```bash
-php bin/sahil ui:status        # add --json for machine-readable output
+php sahil ui:status        # add --json for machine-readable output
 ```
 
 `ui:install` remains available for re-configuring an existing checkout
@@ -267,10 +267,10 @@ the framework mark.
 Generate a complete server-side authentication implementation in one command:
 
 ```bash
-php sahil make:auth                 # complete auth implementation in one command
-php sahil make:auth --ui=bootstrap  # choose a page style explicitly
-php sahil make:auth --dry-run       # print the plan, write nothing
-php sahil make:auth --force         # replace existing files (backup kept)
+php sahil unda:auth                 # complete auth implementation in one command
+php sahil unda:auth --ui=bootstrap  # choose a page style explicitly
+php sahil unda:auth --dry-run       # print the plan, write nothing
+php sahil unda:auth --force         # replace existing files (backup kept)
 ```
 
 Tailwind projects get shadcn/ui-style pages and a sidebar dashboard; Bootstrap
@@ -292,7 +292,7 @@ an account, and authenticated users are redirected away from guest-only routes.
 | `/reset-password/{token}` | `auth/reset-password.sahil.php` |
 | `/dashboard` | `pages/dashboard.sahil.php` |
 
-See `docs/make-auth.md` for the complete file list, `--force` semantics, and
+See `docs/unda-auth.md` for the complete file list, `--force` semantics, and
 how to extend the generated implementation.
 
 `WebRoutesProvider` loads `routes/auth.php` automatically when it exists, so
@@ -319,20 +319,20 @@ are never overwritten without `--force`, which backs them up under
 
 ## CLI
 
-`bin/sahil` boots the application from `bootstrap/app.php` (UI commands run
+`php sahil` boots the application from `bootstrap/app.php` (UI commands run
 before boot, so they work in a partially configured project).
 
 ```bash
-php bin/sahil --help
-php bin/sahil about                         # app name, environment, debug, PHP, booted
-php bin/sahil config:show database          # secrets are always [redacted]
-php bin/sahil env:check                     # variable names only, never values
-php bin/sahil ui:setup [--ui-kit=...] [--css=...]
-php bin/sahil ui:install|ui:dev|ui:build|ui:status|ui:theme
-php bin/sahil make:auth [--ui=tailwind|bootstrap] [--force] [--dry-run]
-php bin/sahil migrate|migrate:status|migrate:rollback|db:seed
-php bin/sahil queue:work|queue:failed|queue:retry|queue:flush
-php bin/sahil schedule:list|schedule:run
+php sahil --help
+php sahil about                         # app name, environment, debug, PHP, booted
+php sahil config:show database          # secrets are always [redacted]
+php sahil env:check                     # variable names only, never values
+php sahil ui:setup [--ui-kit=...] [--css=...]
+php sahil ui:install|ui:dev|ui:build|ui:status|ui:theme
+php sahil unda:auth [--ui=tailwind|bootstrap] [--force] [--dry-run]
+php sahil migrate|migrate:status|migrate:rollback|db:seed
+php sahil queue:work|queue:failed|queue:retry|queue:flush
+php sahil schedule:list|schedule:run
 ```
 
 Destructive operations (`migrate:rollback`, `db:seed`, schema changes in
@@ -348,7 +348,7 @@ a stack trace.
   `.env` when present, loads `config/`, registers `bootstrap/providers.php`,
   and boots the service providers. `sahil_bootstrap()` returns the same
   application instance for the lifetime of a process.
-- Environment variables are listed by `php bin/sahil env:check` and defaulted
+- Environment variables are listed by `php sahil env:check` and defaulted
   in `config/`. Put local values in `.env` (gitignored) or inject them from
   the environment in production.
 
@@ -360,8 +360,8 @@ and `DB_DRIVER`/`DB_DATABASE` may be left empty. Boot, routing, views and
 `/health` work even before that. Apply the shipped migrations:
 
 ```bash
-php bin/sahil migrate:status
-php bin/sahil migrate
+php sahil migrate:status
+php sahil migrate
 ```
 
 The queue and scheduler tables are part of those migrations. To use MySQL or
@@ -373,7 +373,7 @@ PostgreSQL instead, set `DB_DRIVER=mysql|pgsql` plus `DB_HOST`, `DB_PORT`,
 
 Production checklist:
 
-- **`APP_KEY`** — generated by `php bin/sahil key:generate`, required before
+- **`APP_KEY`** — generated by `php sahil key:generate`, required before
   using `Sahil\Encryption\Encrypter` (AES-256-GCM + HMAC). Keep it secret and
   unique per installation.
 - **`APP_ENV=production` and `APP_DEBUG=false`** — debug output and verbose
@@ -411,7 +411,7 @@ are skipped unless `SAHIL_DB_TEST_MYSQL` / `SAHIL_DB_TEST_PGSQL` are set.
 |---|---|
 | `app/Http/` | Controllers (`App\Http`) |
 | `app/Providers/` | Service providers registered at boot |
-| `bin/sahil` | CLI entry point |
+| `php sahil` | CLI entry point |
 | `bootstrap/app.php` | Application bootstrap (`sahil_bootstrap()`) |
 | `bootstrap/providers.php` | Provider manifest |
 | `config/` | Configuration arrays |
@@ -420,8 +420,8 @@ are skipped unless `SAHIL_DB_TEST_MYSQL` / `SAHIL_DB_TEST_PGSQL` are set.
 | `public/css`, `public/js` | Hand-written UI kit assets |
 | `resources/` | Frontend sources for the Vite build |
 | `routes/web.php` | Route table (`/`, `/ui-kit`, `/health`) |
-| `routes/auth.php` | Auth pages generated by `make:auth` (optional) |
-| `.sahil/scaffolds/auth/` | Hidden sources for `make:auth`; copied into `app/`, `routes/` and `resources/views/` on demand |
+| `routes/auth.php` | Auth pages generated by `unda:auth` (optional) |
+| `.sahil/scaffolds/auth/` | Hidden sources for `unda:auth`; copied into `app/`, `routes/` and `resources/views/` on demand |
 | `public/logo.png`, `public/logo-mark.png` | Official SahilPHP logo assets |
 | `storage/` | Logs, compiled views, sessions, cache, uploads |
 | `tests/` | Application test suite (`Tests\`) |
@@ -434,9 +434,9 @@ are skipped unless `SAHIL_DB_TEST_MYSQL` / `SAHIL_DB_TEST_PGSQL` are set.
 |---|---|
 | `The url supplied for the path (../framework) repository does not exist` | Clone the framework repository next to this one (see Installation). |
 | CSS/JS links return 404 | Use `php sahil start` (or `composer start -- --port=8088`); starting only the router script leaves static assets unreachable. |
-| `/` and `/ui-kit` return `500 {"error":"server_error"}` with `APP_ENV=production` | Build the assets: `php bin/sahil ui:build --clean` (they are gitignored). |
+| `/` and `/ui-kit` return `500 {"error":"server_error"}` with `APP_ENV=production` | Build the assets: `php sahil ui:build --clean` (they are gitignored). |
 | Pages render unstyled in development | Start Vite (`npm run dev` or `sahil ui:dev`); the layouts point at `http://127.0.0.1:5173`. |
-| `ui:status` reports missing sources or packages | Run `php bin/sahil ui:install` (and `npm ci` if packages are missing). |
+| `ui:status` reports missing sources or packages | Run `php sahil ui:install` (and `npm ci` if packages are missing). |
 
 ## Contributing
 

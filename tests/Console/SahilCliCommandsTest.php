@@ -7,7 +7,7 @@ namespace Tests\Console;
 use Sahil\Testing\ApplicationTestCase;
 
 /**
- * End-to-end checks of the real `bin/sahil` entry point.
+ * End-to-end checks of the real `sahil` entry point.
  *
  * Each command runs in its own PHP process, so these tests also prove the
  * binary boots from a clean process rather than from this test's memory.
@@ -16,7 +16,7 @@ final class SahilCliCommandsTest extends ApplicationTestCase
 {
     /**
      * The starter-kit installation is the application under test; its
-     * `bin/sahil` is the console binary ApplicationTestCase runs.
+     * `sahil` is the console binary ApplicationTestCase runs.
      */
     protected function basePath(): string
     {
@@ -56,7 +56,7 @@ final class SahilCliCommandsTest extends ApplicationTestCase
             ->assertFailed()
             ->assertExitCode(1)
             ->assertOutputContains('Unknown option')
-            ->assertOutputContains('Usage: php sahil');
+            ->assertOutputContains('php sahil <command>');
     }
 
     public function test_version_prints_framework_and_php_versions(): void

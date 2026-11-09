@@ -53,7 +53,7 @@
                 </li>
                 <li class="list-group-item d-flex align-items-center gap-3 py-2">
                     <span class="text-secondary-subtle">$</span>
-                    <span>php sahil make:auth</span>
+                    <span>php sahil unda:auth</span>
                     <span class="ms-auto font-sans text-muted" style="font-size: .75rem;">auth pages</span>
                 </li>
                 <li class="list-group-item d-flex align-items-center gap-3 py-2">

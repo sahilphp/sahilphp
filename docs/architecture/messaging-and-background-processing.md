@@ -27,7 +27,7 @@ passing tests), **partially implemented** (core works, named gaps remain),
 | HTTP / errors | Kernel with middleware pipeline, central exception handler, `Response`/`Request` value objects. |
 | Logging | `Sahil\Support\Logging\{LoggerContract, FileLogger}` — JSON-lines, level threshold, context redaction. |
 | View | `Sahil\View\{ViewEngine, TemplateResolver, TemplateCompiler, Escaper}` with `ViewContract` bound by `ViewProvider` (alias `view`). |
-| Console | `bin/sahil` — the real CLI (procedural): `about`, `config:show`, `env:check`, `migrate*`, `db:seed`, `queue:work/failed/retry/flush`, `schedule:list/run`. |
+| Console | `sahil` — the real CLI (procedural): `about`, `config:show`, `env:check`, `migrate*`, `db:seed`, `queue:work/failed/retry/flush`, `schedule:list/run`. |
 | Events | **No event system exists** anywhere in the framework (no dispatcher, no listener registry). |
 
 ### 1.2 Test results (recorded, unmodified)
@@ -84,7 +84,7 @@ could host them already exists); no provider-API transport shipped (the
 | Contracts | `src/Contracts/Queue/{QueueContract, DispatcherContract, FailedJobRepositoryContract, QueuedJob, QueueException}.php`, `src/Contracts/Queue/Jobs/JobContract.php` |
 | Core | `src/Queue/{QueueManager, DatabaseQueue, Worker}.php`, `src/Queue/Jobs/Job.php`, `src/Queue/Failed/{FailedJob, FailedJobRepository}.php` |
 | Schema | `database/migrations/2026_10_28_000000_create_jobs_table.php`, `..._000001_create_failed_jobs_table.php` |
-| CLI | `bin/sahil queue:work [--once|--max=N|--queue=]`, `queue:failed`, `queue:retry <id>|\--all`, `queue:flush` |
+| CLI | `sahil queue:work [--once|--max=N|--queue=]`, `queue:failed`, `queue:retry <id>|\--all`, `queue:flush` |
 | Wiring | `app/Providers/QueueProvider.php`, `config/queue.php` (`QUEUE_*` env vars) |
 | Tests | `tests/Queue/*` (7 files + in-memory fakes) |
 
@@ -163,7 +163,7 @@ ORM `create()` cannot backfill ids on PostgreSQL (provide an explicit id).
 | Contracts | `src/Contracts/Scheduler/{ClockContract, LockContract}.php` |
 | Definition | `routes/schedule.php` (declarative), `config/schedule.php` (`SCHEDULE_*`) |
 | Wiring | `app/Providers/ScheduleProvider.php` (lazy) |
-| CLI | `bin/sahil schedule:list [--at=…]`, `schedule:run [--at=…] [--only=…]` |
+| CLI | `sahil schedule:list [--at=…]`, `schedule:run [--at=…] [--only=…]` |
 | Tests | `tests/Scheduler/*` (10 files, incl. frozen-clock and DST cases) |
 
 Delivers: cron + interval cadence, timezones with DST wall-clock semantics,
@@ -192,7 +192,7 @@ observability *additions*, not prerequisites.
 ### 1.4 Duplicated responsibilities & compatibility risks found
 
 1. **Orphaned console engine — `src/Console/`:** a second, incomplete CLI
-   layer (`Application`, `Input`, `Output`, `Commands/*`) that `bin/sahil`
+   layer (`Application`, `Input`, `Output`, `Commands/*`) that `sahil`
    does **not** use (no references), and no tests cover it. Concrete
    incompatibilities:
    - `Console\Application::getWorker()` constructs `Worker` with
@@ -204,8 +204,8 @@ observability *additions*, not prerequisites.
    - The base `Command` class is buried inside `QueueCommand.php`
      (`abstract class Command` at line 11) — file/class mismatch.
    - Command names (`queue:work`, `queue:run`, `queue:dispatch`, …)
-     duplicate/overlap the working `bin/sahil` surface.
-   **Recommendation:** delete or fully migrate onto `bin/sahil` in a
+     duplicate/overlap the working `sahil` surface.
+   **Recommendation:** delete or fully migrate onto `sahil` in a
    dedicated cleanup phase. Do not build new features on it.
 2. **README drift:** README says the view layer is "still to come" although
    `src/View` exists (and `tests/View/ExpressionTest` fails — pre-existing).
@@ -220,7 +220,7 @@ observability *additions*, not prerequisites.
 Boundaries follow the conventions already in the repository: contracts in
 `src/Contracts/<feature>/`, implementations in `src/feature/`, wiring in
 `app/Providers/<feature>Provider.php`, settings in `config/<feature>.php`,
-CLI in `bin/sahil`, tests in `tests/<feature>/`.
+CLI in `sahil`, tests in `tests/<feature>/`.
 
 ### 2.1 Mail — extend in place
 
@@ -334,7 +334,7 @@ a scheduler-only installation with no queue never touches queue services.
    └──────────────────┘  └──────────────────┘  │      │  database (proposed) │
                                                │      └──────────────────────┘
                                     ┌──────────▼───────────┐
-                                    │  jobs table (DB)     │◄──── bin/sahil
+                                    │  jobs table (DB)     │◄──── sahil
                                     │  push/pop FOR UPDATE │      queue:work
                                     └──────────┬───────────┘
                                     ┌──────────▼───────────┐
@@ -343,7 +343,7 @@ a scheduler-only installation with no queue never touches queue services.
                                     │  release / delete    │             queue:retry
                                     └──────────────────────┘
 
-  bin/sahil schedule:run ─▶ ScheduleRunner ─▶ due Task closures (in-process)
+  sahil schedule:run ─▶ ScheduleRunner ─▶ due Task closures (in-process)
                                  │                  │
                                  │                  └──(proposed)──▶ DispatcherContract
                                  ├── FileLock (flock) / DatabaseLock (advisory)
@@ -551,9 +551,9 @@ $schedule->call('rebuild-search', static function (): void {
 *Existing:*
 
 ```bash
-bin/sahil queue:work                              # until interrupted
-bin/sahil queue:work --once                       # one job
-bin/sahil queue:work --queue=emails --max=100
+sahil queue:work                              # until interrupted
+sahil queue:work --once                       # one job
+sahil queue:work --queue=emails --max=100
 ```
 
 *Proposed flags (Phase A):* `--timeout` override, graceful SIGTERM stop
@@ -565,13 +565,13 @@ supervisor restarts the process.
 *Existing:*
 
 ```bash
-bin/sahil queue:failed                 # id, queue, time, reason
-bin/sahil queue:retry <id>             # replay one
-bin/sahil queue:retry --all            # replay everything on the queue
-bin/sahil queue:flush                  # forget failures (destructive, gated)
+sahil queue:failed                 # id, queue, time, reason
+sahil queue:retry <id>             # replay one
+sahil queue:retry --all            # replay everything on the queue
+sahil queue:flush                  # forget failures (destructive, gated)
 ```
 
-*Proposed:* `bin/sahil queue:stats` — per-queue depth, ready/delayed/
+*Proposed:* `sahil queue:stats` — per-queue depth, ready/delayed/
 reserved counts, oldest ready age, failed count.
 
 ---
@@ -859,7 +859,7 @@ suite green (`composer check`).
 | # | Decision | Options | Recommendation |
 |---|---|---|---|
 | 1 | Redis dependency (Phase F) | `predis/predis` (pure PHP, no ext) vs `ext-redis` (faster, ops burden) vs skip Redis entirely | Default: **skip** until scale demands it; the registry in Phase A makes it pluggable later with no further framework change |
-| 2 | Fate of `src/Console/` | Delete vs migrate `bin/sahil` onto it | **Delete** (it is untested and internally incompatible) |
+| 2 | Fate of `src/Console/` | Delete vs migrate `sahil` onto it | **Delete** (it is untested and internally incompatible) |
 | 3 | Payload signing | None / HMAC with app secret | Optional hardening — decide if untrusted DB access is in the threat model |
 | 4 | Execution-time DI model for jobs | (a) keep plain jobs + `app()` inside `handle()`; (b) container-invoked `handle()` params via reflection; (c) explicit `Job::middleware` pipeline | Recommend **(a) now, (b) as an additive Worker option**; (c) only if a real need appears |
 | 5 | Event system scope | Full event bus vs minimal queue/scheduler listener registry | **Minimal registry** (Phase E) — a general event bus is a separate initiative |
@@ -870,7 +870,7 @@ suite green (`composer check`).
 
 ## Appendix — inspected files
 
-`composer.json`, `bin/sahil`, `phpunit.xml`, `config/{mail,queue,schedule}.php`,
+`composer.json`, `sahil`, `phpunit.xml`, `config/{mail,queue,schedule}.php`,
 `routes/schedule.php`, `database/migrations/*jobs*`, `app/Providers/{Mail,Queue,Schedule,Auth,Session,View}Provider.php`,
 `src/Contracts/Mail/*`, `src/Contracts/Queue/*` (incl. `Jobs/JobContract.php`),
 `src/Contracts/Notifications/*`, `src/Contracts/Scheduler/*`,

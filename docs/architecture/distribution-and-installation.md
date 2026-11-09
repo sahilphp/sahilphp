@@ -75,9 +75,9 @@ Run from the repository root on 2026-10-28. Environment: PHP 8.4.27, Composer
 | `composer analyse` | **exit 1** — PHPStan level 6 reports **103 errors** |
 | `composer check-style` | **exit 8** — PHP-CS-Fixer dry run reports **6 of 372 files** need style fixes |
 | `composer audit` | `No security vulnerability advisories found` |
-| `php bin/sahil about` | **exit 0** — `SahilPHP`, environment `development`, PHP 8.4.27, `booted: yes` |
-| `php bin/sahil --version` | **exit 0** — `SahilPHP, PHP 8.4.27` |
-| `php bin/sahil env:check` | **exit 0** — reports unset optional variables; values are never printed |
+| `php sahil about` | **exit 0** — `SahilPHP`, environment `development`, PHP 8.4.27, `booted: yes` |
+| `php sahil --version` | **exit 0** — `SahilPHP, PHP 8.4.27` |
+| `php sahil env:check` | **exit 0** — reports unset optional variables; values are never printed |
 | `git ls-files` | **1 tracked file** (`README.md`); the rest of the tree is untracked |
 | `git log --oneline` | **1 commit** — `b30c0c9 first commit` |
 | `git tag --list` | **no tags** |
@@ -134,7 +134,7 @@ The six style findings are in:
 CLI boot is working:
 
 ```
-bin/sahil
+sahil
   └─ require vendor/autoload.php
   └─ require bootstrap/app.php
        ├─ require vendor/autoload.php
@@ -146,7 +146,7 @@ bin/sahil
   └─ app services resolved from the container
 ```
 
-`php bin/sahil about` proves this path works in the current checkout. The HTTP
+`php sahil about` proves this path works in the current checkout. The HTTP
 path does not: `public/index.php` resolves the kernel but never calls it.
 
 ---
@@ -161,7 +161,7 @@ path does not: `public/index.php` resolves the kernel but never calls it.
 | `src/Support/helpers.php` | Global helpers, guarded with `function_exists` | **Framework** | Already autoloaded via `autoload.files`. |
 | `app/` | 17 PHP files: 14 providers + 3 controllers | **Skeleton** | `App\` namespace. |
 | `bootstrap/` | `app.php`, `providers.php` | **Skeleton** | Builds the installation-specific application graph. |
-| `bin/sahil` | CLI entry point | **Skeleton** | Requires the project's `bootstrap/app.php`; UI commands can run before boot. |
+| `sahil` | CLI entry point | **Skeleton** | Requires the project's `bootstrap/app.php`; UI commands can run before boot. |
 | `public/index.php` | Broken HTTP entry point | **Skeleton** | Must be rewritten before acceptance criteria 3/4 can pass. |
 | `public/build/` | 5 built asset files (220–228 KB CSS files, small JS files) | **Skeleton (ignored build output)** | Actual runtime asset output. Not a source of truth. |
 | `config/` | 11 PHP files: `app`, `assets`, `auth`, `cache`, `database`, `mail`, `queue`, `schedule`, `session`, `storage`, `view` | **Skeleton** | `Application::loadConfiguration()` requires the directory. |
@@ -210,7 +210,7 @@ Framework code is almost entirely path-neutral:
 - `Application::configure($basePath)` owns `basePath()`, `configPath()`,
   `storagePath()`, and `environmentPath()`.
 - `bootstrap/app.php` uses `dirname(__DIR__)` for the project root.
-- `bin/sahil` uses `dirname(__DIR__)` for the project root.
+- `sahil` uses `dirname(__DIR__)` for the project root.
 - `App\Providers\WebRoutesProvider` and `ScheduleProvider` use
   `dirname(__DIR__, 2)` relative to their own files, which is correct for an
   app provider stored at `app/Providers/*.php`.
@@ -241,7 +241,7 @@ tests:
 - `tests/Http/UiKitRouteTest.php` (extends `ApplicationTestCase`);
 - `tests/View/AssetProviderTest.php` (extends `ApplicationTestCase`);
 - `tests/View/SampleViewsTest.php` (renders the real root `views/` directory);
-- `tests/Console/SahilCliTest.php` (runs the real `bin/sahil`);
+- `tests/Console/SahilCliTest.php` (runs the real `sahil`);
 - `tests/Console/SahilCliCommandsTest.php` (extends `ApplicationTestCase`);
 - `tests/Console/UiCommandsTest.php` (extends `ApplicationTestCase`, targets
   temporary paths through the real CLI);
@@ -345,7 +345,7 @@ composer.lock                 # committed after framework publication
 .gitignore
 README.md
 LICENSE
-bin/sahil
+sahil
 bootstrap/app.php
 bootstrap/providers.php
 public/index.php              # corrected HTTP entry point
@@ -401,7 +401,7 @@ Notes:
 - If Phase 7 theming is included, commit `theme/tokens.json` and the
   user-owned overrides (`resources/css/theme.overrides.css`,
   `resources/scss/_sahil-theme.overrides.scss`); generated theme files can be
-  recreated with `php bin/sahil ui:theme`. Theme output has no runtime
+  recreated with `php sahil ui:theme`. Theme output has no runtime
   dependency.
 - Do not commit `public/build/`, `node_modules/`, or `dist/`.
 - Delete the two unused `welcome.blade.php` files or convert them to a real
@@ -457,7 +457,7 @@ Target:
 composer create-project sahilphp/app my-project
 cd my-project
 cp .env.example .env
-php bin/sahil about
+php sahil about
 composer start
 # then:
 curl -fsS http://127.0.0.1:8000/health
@@ -465,7 +465,7 @@ curl -fsS http://127.0.0.1:8000/health
 
 These commands are **target behavior**. They do not work today because
 `sahilphp/app` is not published and the current HTTP entry point is broken.
-In-repo equivalents (`composer install`, `php bin/sahil about`) do work.
+In-repo equivalents (`composer install`, `php sahil about`) do work.
 
 ### 6.2 Minimum steps for a working installation
 
@@ -474,9 +474,9 @@ In-repo equivalents (`composer install`, `php bin/sahil about`) do work.
 | `composer create-project sahilphp/app` | **Yes** | Installs framework dependencies, generates the autoloader, and copies the skeleton. |
 | `cp .env.example .env` | **Recommended / required for normal deployment** | `Application::loadEnvironment('.env')` tolerates a missing file, but database/mail/session/asset configuration needs values. Production may inject OS environment variables instead. |
 | Writable `storage/` directories | **Yes** | `FileLogger` does not create its directory; shipping `.gitkeep` directories is required. `FileSessionDriver` creates session directories, but the skeleton should still ship them. |
-| `php bin/sahil migrate` | **Optional for hello-world; required before DB-backed features** | Queue/failed-job/auth tables and any application schema need migrations. |
+| `php sahil migrate` | **Optional for hello-world; required before DB-backed features** | Queue/failed-job/auth tables and any application schema need migrations. |
 | `composer install` | **Implicit** | `create-project` runs it. |
-| `php bin/sahil ui:install …` / `ui:build` | **Only if using compiled assets** | Node is optional; the framework must boot without it. |
+| `php sahil ui:install …` / `ui:build` | **Only if using compiled assets** | Node is optional; the framework must boot without it. |
 | A key-generation command | **No** | No `APP_KEY` concept exists today. Do not document one. |
 
 ### 6.3 Serving
@@ -531,7 +531,7 @@ my-project/
 ├── LICENSE                      # MIT (proposed; inherit the framework license)
 ├── composer.json                # sahilphp/app; App\ + Tests\
 ├── composer.lock                # commit in applications for reproducible installs
-├── bin/sahil                    # CLI entry point
+├── sahil                    # CLI entry point
 ├── bootstrap/
 │   ├── app.php                  # base path, .env, config, providers, boot
 │   └── providers.php            # 14 App\Providers
@@ -602,7 +602,7 @@ into the application.
 | `dist/` | Legacy build output | **No** (and remove it) |
 
 If generated theme files are ignored, a fresh checkout must run
-`php bin/sahil ui:theme` before building themed assets. If they are committed,
+`php sahil ui:theme` before building themed assets. If they are committed,
 the build is self-contained but duplicated by regeneration.
 
 ---
@@ -738,7 +738,7 @@ Current status of those gates:
 |---|---|---|---|
 | 1 | Framework core installable as a Composer dependency | ❌ Not published (all three package names 404); `App\` is still in the framework autoload | `composer require sahilphp/framework` in an empty directory resolves a tagged release; `Sahil\Foundation\Application` autoloads. |
 | 2 | Fresh application without copying the framework repository | ❌ No skeleton package; app and framework live in one tree | `composer create-project sahilphp/app /tmp/demo` succeeds; `/tmp/demo` has no framework `src/` or framework tests. |
-| 3 | Application autoloads and boots | ⚠ CLI boot works (`php bin/sahil about` exits 0); HTTP front controller is broken; fresh package boot untested | `php bin/sahil about` exits 0 in a created project; `sahil_bootstrap()` returns a booted `Application`; HTTP entry point resolves through the kernel. |
+| 3 | Application autoloads and boots | ⚠ CLI boot works (`php sahil about` exits 0); HTTP front controller is broken; fresh package boot untested | `php sahil about` exits 0 in a created project; `sahil_bootstrap()` returns a booted `Application`; HTTP entry point resolves through the kernel. |
 | 4 | A basic route returns an HTTP response | ❌ `GET /health` returns 500 today; `HttpEntryPointTest` fails | Corrected `public/index.php`; `composer start`; `curl -fsS localhost:8000/health` → 200 JSON. |
 | 5 | Tests run from the newly created application | ❌ Not possible yet | `vendor/bin/phpunit` inside a created project exits 0 with the migrated application tests. |
 | 6 | Clear failure when PHP version or extensions are missing | ⚠ Composer blocks unsupported PHP; no extension preflight | Lower `require.php` in a branch and observe Composer's platform error; `sahil doctor` prints one actionable line per missing extension and exits non-zero. |
@@ -844,9 +844,9 @@ composer lint
 composer analyse
 composer check-style
 composer audit
-php bin/sahil about
-php bin/sahil --version
-php bin/sahil env:check
+php sahil about
+php sahil --version
+php sahil env:check
 git status --short --branch
 git ls-files
 git tag --list
@@ -866,7 +866,7 @@ curl -sS -L -o /dev/null -w '%{http_code}' \
 - **Manifests:** root `composer.json` (only Composer manifest), `package.json`.
 - **Autoload:** `Sahil\`/`App\` PSR-4, `src/Support/helpers.php`, strict PSR run.
 - **Boot:** `public/index.php`, `bootstrap/app.php`, `bootstrap/providers.php`,
-  `bin/sahil`, `app/Providers/WebRoutesProvider.php`, `routes/web.php`,
+  `sahil`, `app/Providers/WebRoutesProvider.php`, `routes/web.php`,
   `src/Foundation/Application.php`.
 - **Configuration/runtime:** `config/*` (11 files), `.env.example` (55
   variables), `storage` tree, `.gitignore`, `public/storage`.

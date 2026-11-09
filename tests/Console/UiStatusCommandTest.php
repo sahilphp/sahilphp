@@ -147,7 +147,7 @@ final class UiStatusCommandTest extends TestCase
     private function runStatus(array $arguments, array $environment = []): array
     {
         $root = dirname(__DIR__, 2);
-        $command = [PHP_BINARY, $root.'/bin/sahil', 'ui:status', ...$arguments];
+        $command = [PHP_BINARY, $root.'/sahil', 'ui:status', ...$arguments];
 
         $pipes = [];
         $process = proc_open(

@@ -56,6 +56,7 @@
 
     {{-- Profile JavaScript, then page-specific scripts. --}}
     @asset_js('main')
+    @asset_js('kit')
     @asset_js('@fiberscripts')
     @yield('scripts')
 </body>

@@ -15,7 +15,7 @@ final class ConsoleExampleTest extends ApplicationTestCase
 {
     /**
      * The starter-kit installation is the application under test; its
-     * `bin/sahil` is the console binary ApplicationTestCase runs.
+     * `sahil` is the console binary ApplicationTestCase runs.
      */
     protected function basePath(): string
     {
@@ -34,8 +34,8 @@ final class ConsoleExampleTest extends ApplicationTestCase
     {
         $this->runCommand(['not:a-command'])
             ->assertFailed()
-            ->assertOutputContains('Unknown option')
-            ->assertOutputContains('Usage: php sahil');
+            ->assertOutputContains('Unknown command')
+            ->assertOutputContains('php sahil <command>');
     }
 
     public function test_version_flag_reports_php_version(): void

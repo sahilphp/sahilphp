@@ -9,10 +9,10 @@
             "email": "idrisajohn19@gmail.com"
         }
     ],
-    "homepage": "https://github.com/sahilphp/starter-kit",
+    "homepage": "https://github.com/sahilphp/sahilphp",
     "support": {
-        "issues": "https://github.com/sahilphp/starter-kit/issues",
-        "source": "https://github.com/sahilphp/starter-kit"
+        "issues": "https://github.com/sahilphp/sahilphp/issues",
+        "source": "https://github.com/sahilphp/sahilphp"
     },
     "keywords": [
         "sahilphp",
@@ -20,22 +20,10 @@
         "application",
         "framework"
     ],
-    "repositories": [
-        {
-            "type": "path",
-            "url": "../firefiber",
-            "options": {
-                "symlink": true,
-                "versions": {
-                    "sahilphp/firefiber": "1.0.0"
-                }
-            }
-        }
-    ],
     "require": {
         "php": "^8.4",
         "sahilphp/firefiber": "^1.0",
-        "sahilphp/framework": "^1.0"
+        "sahilphp/framework": "^1.1"
     },
     "require-dev": {
         "phpunit/phpunit": "^10.5"
@@ -55,9 +43,26 @@
         "test": "phpunit --configuration phpunit.xml --colors=always",
         "post-create-project-cmd": [
             "@php -r \"file_exists('.env') || copy('.env.example', '.env');\"",
-            "@php bin/sahil key:generate",
-            "@php bin/sahil storage:prepare",
-            "@php bin/sahil ui:setup"
+            "@php sahil key:generate",
+            "@php sahil storage:prepare",
+            "@php sahil ui:setup"
+        ]
+    },
+    "archive": {
+        "exclude": [
+            "/.git",
+            "/.github",
+            "/.phpunit.cache",
+            "/bin",
+            "/composer.lock",
+            "/dist",
+            "/docs",
+            "/node_modules",
+            "/package-lock.json",
+            "/public/build",
+            "/starter-kit",
+            "/tests",
+            "/vendor"
         ]
     },
     "minimum-stability": "stable",

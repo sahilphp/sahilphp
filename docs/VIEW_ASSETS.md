@@ -19,10 +19,10 @@ the production build URL.
 Install exactly one profile per application:
 
 ```bash
-php bin/sahil ui:install tailwind
-php bin/sahil ui:install bootstrap
-php bin/sahil ui:install both
-php bin/sahil ui:install none
+php sahil ui:install tailwind
+php sahil ui:install bootstrap
+php sahil ui:install both
+php sahil ui:install none
 ```
 
 `ui:install` writes `.sahil-ui.json`, which records the profile and generated
@@ -57,7 +57,7 @@ framework is never loaded implicitly.
 the developer selected it explicitly.
 
 After installing a profile, the optional neutral theme layer can be generated
-with `php bin/sahil ui:theme`. It changes CSS custom properties and framework
+with `php sahil ui:theme`. It changes CSS custom properties and framework
 theme mappings, not the asset entry-point contract above; layouts keep using
 the same `@asset_*` helpers. See [`THEMING.md`](THEMING.md).
 
@@ -266,11 +266,11 @@ Bootstrap adds its module script:
 Typical workflow:
 
 ```bash
-php bin/sahil ui:install tailwind
-php bin/sahil ui:theme        # optional neutral theme tokens
-php bin/sahil ui:dev          # during development
-php bin/sahil ui:build        # before production
-php bin/sahil ui:status       # verify sources, packages and outputs
+php sahil ui:install tailwind
+php sahil ui:theme        # optional neutral theme tokens
+php sahil ui:dev          # during development
+php sahil ui:build        # before production
+php sahil ui:status       # verify sources, packages and outputs
 ```
 
 A missing production build is a render error by default. Set
