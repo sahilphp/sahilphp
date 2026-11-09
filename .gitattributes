@@ -20,7 +20,6 @@
 /node_modules            export-ignore
 /package-lock.json       export-ignore
 /public/build            export-ignore
-/starter-kit             export-ignore
 /.phpunit.cache          export-ignore
 /vendor                  export-ignore
 

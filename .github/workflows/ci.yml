@@ -31,7 +31,7 @@ jobs:
 
       - uses: actions/checkout@v4
         with:
-          path: starter-kit
+          path: sahilphp
 
       - uses: shivammathur/setup-php@v2
         with:
@@ -40,19 +40,19 @@ jobs:
           extensions: openssl, json, mbstring, pdo
 
       - name: Validate composer.json
-        working-directory: starter-kit
+        working-directory: sahilphp
         run: composer validate --strict
 
       - name: Install dependencies (lowest)
-        working-directory: starter-kit
+        working-directory: sahilphp
         run: composer update --prefer-lowest --no-interaction --no-progress
 
       - name: Test
-        working-directory: starter-kit
+        working-directory: sahilphp
         run: composer test
 
       - name: Dependency audit
-        working-directory: starter-kit
+        working-directory: sahilphp
         run: composer audit
 
   test-85:
@@ -72,7 +72,7 @@ jobs:
 
       - uses: actions/checkout@v4
         with:
-          path: starter-kit
+          path: sahilphp
 
       - uses: shivammathur/setup-php@v2
         with:
@@ -81,19 +81,19 @@ jobs:
           extensions: openssl, json, mbstring, pdo
 
       - name: Validate composer.json
-        working-directory: starter-kit
+        working-directory: sahilphp
         run: composer validate --strict
 
       - name: Install dependencies (stable)
-        working-directory: starter-kit
+        working-directory: sahilphp
         run: composer update --no-interaction --no-progress
 
       - name: Test
-        working-directory: starter-kit
+        working-directory: sahilphp
         run: composer test
 
       - name: Dependency audit
-        working-directory: starter-kit
+        working-directory: sahilphp
         run: composer audit
 
   php-83-failure:
@@ -107,7 +107,7 @@ jobs:
 
       - uses: actions/checkout@v4
         with:
-          path: starter-kit
+          path: sahilphp
 
       - uses: shivammathur/setup-php@v2
         with:
@@ -115,10 +115,11 @@ jobs:
           coverage: none
 
       - name: Validate composer.json (should fail)
-        working-directory: starter-kit
+        working-directory: sahilphp
         run: composer validate --strict 2>&1 | head -5 || true
 
       - name: Verify PHP 8.3 fails
+        working-directory: sahilphp
         run: |
           set +e
           composer install --no-interaction --no-progress 2>&1 | grep -i "platform" | head -1 || echo "FAILED to fail as expected"

@@ -9,6 +9,10 @@ The framework itself is the reusable `sahilphp/framework` package. This
 repository owns the application: configuration, providers, routes, views,
 entry points and tests.
 
+The canonical project directory is `sahilphp/`, and the canonical Composer
+package is `sahilphp/sahilphp`. There is no separate `starter-kit/` project
+directory in this monorepo.
+
 ## Requirements
 
 
@@ -61,11 +65,13 @@ cd my-app
 ```
 
 `create-project` copies the application, installs `sahilphp/framework` and its
-dependencies, then runs three hooks:
+dependencies, then runs four hooks:
 
 1. `.env.example` is copied to `.env` (skipped when `.env` already exists);
 2. `php sahil key:generate` writes a unique `APP_KEY`;
-3. `php sahil storage:prepare` creates the writable storage tree.
+3. `php sahil storage:prepare` creates the writable storage tree;
+4. `php sahil ui:setup` asks for one UI kit and one CSS framework and installs
+   only those stubs.
 
 No `.env` file is strictly required: the application boots with the
 documented defaults (`APP_ENV=development`, `APP_DEBUG=false`, UTC). Copy the
@@ -92,6 +98,10 @@ Choose your UI framework:
   [1] Tailwind CSS
   [2] Bootstrap 5
 ```
+
+This checkout-local `php sahil new` path is the legacy two-profile installer
+(Tailwind or Bootstrap). For the five UI choices — Firefiber, React, Vue,
+Svelte or none — use the global `sahilphp new --ui-kit=... --css=...` installer.
 
 It copies the application sources, removes frontend files that do not belong to
 the selected profile, installs PHP and frontend dependencies, and generates
@@ -129,7 +139,7 @@ and point Composer at that checkout (remove the entry before committing):
 
 ```bash
 composer config repositories.framework \
-  '{"type":"path","url":"../framework","options":{"symlink":true,"versions":{"sahilphp/framework":"1.0.0"}}}'
+  '{"type":"path","url":"../framework","options":{"symlink":true,"versions":{"sahilphp/framework":"1.1.0"}}}'
 composer update sahilphp/framework
 ```
 

@@ -5,15 +5,15 @@ kit; the framework package (`sahilphp/framework`) has its own copy.
 
 ## Requirements
 
-- PHP **8.1 or newer** (CI runs 8.1, 8.2, 8.3 and 8.4)
+- PHP **8.4 or newer** (CI runs 8.4 and 8.5)
 - Composer 2.x
 - Git — the framework is normally resolved from Packagist
 
 ## Getting started
 
 ```bash
-git clone https://github.com/sahilphp/starter-kit.git
-cd starter-kit
+git clone https://github.com/sahilphp/sahilphp.git
+cd sahilphp
 composer install
 cp .env.example .env
 php sahil key:generate
@@ -25,7 +25,7 @@ When you also work on the framework, clone it next to this repository and add
 a temporary path repository instead of installing from Packagist:
 
 ```bash
-composer config repositories.framework '{"type":"path","url":"../framework","options":{"symlink":true,"versions":{"sahilphp/framework":"1.0.0"}}}'
+composer config repositories.framework '{"type":"path","url":"../framework","options":{"symlink":true,"versions":{"sahilphp/framework":"1.1.0"}}}'
 composer update sahilphp/framework
 ```
 

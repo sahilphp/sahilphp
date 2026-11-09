@@ -14,11 +14,11 @@ Report privately through GitHub's [private vulnerability reporting][report]
 (Security → Advisories → "Report a vulnerability") or by e-mail to
 `idrisajohn19@gmail.com`.
 
-[report]: https://github.com/sahilphp/starter-kit/security/advisories/new
+[report]: https://github.com/sahilphp/sahilphp/security/advisories/new
 
 Include:
 
-- affected version (`composer show sahilphp/starter-kit`),
+- affected version (`composer show sahilphp/sahilphp`),
 - a description of the issue and its impact,
 - reproduction steps or a proof of concept,
 - any suggested fix.

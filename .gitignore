@@ -44,6 +44,3 @@
 # Audit backup (never distributed)
 /composer.json.backup
 composer.lock
-
-# Local mirror artifact (never distributed)
-/starter-kit/
