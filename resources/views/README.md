@@ -42,9 +42,32 @@ looks finished before any code is written. The asset files are:
   navigation for the plain profile.
 
 Installing a UI profile (`php sahil ui:install tailwind|bootstrap`) replaces
-the layout, navigation, welcome, error and example templates with that
-profile's versions. `GET /ui-kit` renders the example page that matches the
-active profile.
+the layout, navigation, welcome and example templates with that profile's
+versions. `GET /ui-kit` renders the example page that matches the active
+profile.
+
+## Error pages
+
+`errors/` holds this application's own copies of the framework error pages
+(`400`, `401`, `403`, `404`, `405`, `419`, `429`, `500`, `503` and the generic
+`4xx`/`5xx` groups). They were copied here with
+`php sahil error:publish` and are what the framework renders for browser
+requests — API clients keep the JSON contract — so a failed request never
+shows a raw JSON body or a blank page.
+
+```bash
+php sahil error:publish --force   # refresh these copies from the framework
+```
+
+Because the application's view roots are searched before the framework's, an
+edited file here takes over immediately; pages that are not copied keep using
+the framework's version. `errors/layout.sahil.php` is the shared shell (the
+`@yield('head')` section is where a page adds its own styles), and each page
+supplies its `content`/`actions` sections.
+
+The pages are self-contained on purpose (inline CSS, no asset build) — the 500
+page must render even when the CSS build, the database or the session storage
+is the thing that failed.
 
 ## Authentication views
 

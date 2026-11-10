@@ -67,16 +67,16 @@ final class HttpEntryPointTest extends TestCase
         self::assertStringNotContainsString('XSRF-TOKEN', $responseHeaders);
     }
 
-    public function test_unknown_paths_respond_with_safe_404(): void
+    public function test_unknown_paths_respond_with_a_designed_html_404_page(): void
     {
-        [$status, $body] = $this->request('/no-such-page');
+        [$status, $body, $contentType] = $this->request('/no-such-page');
 
         self::assertSame(404, $status);
-        self::assertSame(
-            ['error' => 'http_error', 'status' => 404],
-            json_decode($body, true, 512, JSON_THROW_ON_ERROR),
-            'kernel-rendered 404: status shown, no application internals'
-        );
+        self::assertSame('text/html; charset=utf-8', $contentType, 'a browser gets a page, not a JSON body');
+        self::assertStringContainsString('<!doctype html>', $body);
+        self::assertStringContainsString('This page could not be found', $body);
+        self::assertStringContainsString('Back to home', $body);
+        self::assertStringNotContainsString('http_error', $body);
         self::assertStringNotContainsString('laravel', strtolower($body));
     }
 

@@ -26,6 +26,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   `composer create-project` asks the two setup questions automatically.
 
 ### Changed
+- Error pages now live in `resources/views/errors/` (published with
+  `php sahil error:publish`). The `404` page offers the app's popular routes
+  instead of a dead end, `500` explains how to recover, `403` shows a lock and
+  the permission options, `429` visualises the exhausted request budget, and
+  `419` shows the expired session token as a stamped ticket; all share the
+  layout's dark-mode-aware, build-free styling.
+- The starter no longer ships `resources/views/pages/404.sahil.php` and
+  `pages/500.sahil.php`: the framework renders designed error pages for every
+  common status (HTML for browsers, JSON for API clients), and
+  `php sahil error:publish` copies them into `resources/views/errors/` when a
+  project wants its own copy.
 - Project creation asks for the UI kit and then the CSS framework before any
   file is written. The base starter-kit ships no installed UI kit or CSS
   framework code.

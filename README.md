@@ -494,7 +494,8 @@ are skipped unless `SAHIL_DB_TEST_MYSQL` / `SAHIL_DB_TEST_PGSQL` are set.
 |---|---|
 | `The url supplied for the path (../framework) repository does not exist` | Clone the framework repository next to this one (see Installation). |
 | CSS/JS links return 404 | Use `php sahil start` (or `composer start -- --port=8088`); starting only the router script leaves static assets unreachable. |
-| `/` and `/ui-kit` return `500 {"error":"server_error"}` with `APP_ENV=production` | Build the assets: `php sahil ui:build --clean` (they are gitignored). |
+| `/` and `/ui-kit` return the 500 error page with `APP_ENV=production` | Build the assets: `php sahil ui:build --clean` (they are gitignored). |
+| You want to restyle the 404/500 pages | Run `php sahil error:publish` and edit `resources/views/errors/`; the framework renders its own copies until then. |
 | Pages render unstyled in development | Start Vite (`npm run dev` or `sahil ui:dev`); the layouts point at `http://127.0.0.1:5173`. |
 | `ui:status` reports missing sources or packages | Run `php sahil ui:install` (and `npm ci` if packages are missing). |
 

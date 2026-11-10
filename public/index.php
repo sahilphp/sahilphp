@@ -43,8 +43,15 @@ try {
     $response = $kernel->handle($request);
 
 } catch (Throwable $bootFailure) {
-    $response = Response::json(['error' => 'server_error'], 500);
-    $request = null;
+    $request = class_exists(Request::class) ? Request::fromGlobals() : null;
+
+    // Boot failed, so no container, config or views are trustworthy: the
+    // framework's self-contained page still answers a browser with HTML while
+    // machine clients keep the JSON contract. No debug details ever appear on
+    // this path.
+    $response = $request !== null && class_exists(\Sahil\Http\ErrorRenderer::class)
+        ? (new \Sahil\Http\ErrorRenderer())->respond($bootFailure, $request)
+        : Response::json(['error' => 'server_error'], 500);
 }
 
 (new DefaultResponseEmitter())->emit($response, $request);

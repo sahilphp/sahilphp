@@ -6,7 +6,9 @@ namespace App\Providers;
 
 use Sahil\Foundation\CentralExceptionHandler;
 use Sahil\Foundation\ServiceProvider;
+use Sahil\Http\ErrorRenderer;
 use Sahil\Http\Kernel;
+use Sahil\Http\Request;
 use Sahil\Http\Middleware\SecurityHeaders;
 use Sahil\Support\Logging\FileLogger;
 use Sahil\Support\Logging\LoggerContract;
@@ -42,7 +44,13 @@ final class ObservabilityProvider extends ServiceProvider
         $container->singleton(
             CentralExceptionHandler::class,
             static fn (\Sahil\Container\Container $c): CentralExceptionHandler
-                => new CentralExceptionHandler($c->make(LoggerContract::class))
+                => new CentralExceptionHandler(
+                    $c->make(LoggerContract::class),
+                    // Browsers get a designed HTML error page, API clients keep
+                    // the JSON contract; publish the pages to customize them:
+                    // `php sahil error:publish`.
+                    ErrorRenderer::fromContainer($c)
+                )
         );
     }
 
@@ -64,10 +72,10 @@ final class ObservabilityProvider extends ServiceProvider
                 ->config()->get('app.debug') === true;
 
             $container->instance(Kernel::class, $kernel->usingExceptionHandler(
-                static function (\Throwable $throwable) use ($handler, $debug): ?\Sahil\Http\Response {
+                static function (\Throwable $throwable, ?Request $request = null) use ($handler, $debug): ?\Sahil\Http\Response {
                     $handler->report($throwable);
 
-                    return $handler->render($throwable, $debug);
+                    return $handler->render($throwable, $debug, $request);
                 }
             ));
         }
