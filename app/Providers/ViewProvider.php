@@ -7,6 +7,7 @@ namespace App\Providers;
 use Sahil\Container\Container;
 use Sahil\Contracts\Assets\AssetManagerContract;
 use Sahil\Contracts\Foundation\ApplicationContract;
+use Sahil\Contracts\View\ComponentRendererContract;
 use Sahil\Contracts\View\ViewContract;
 use Sahil\Foundation\ServiceProvider;
 use Sahil\View\TemplateCompiler;
@@ -88,7 +89,14 @@ final class ViewProvider extends ServiceProvider
                 ? $container->make(AssetManagerContract::class)
                 : null;
 
-            return new ViewEngine($resolver, $compiler, $assets);
+            // A server-driven UI package (Firefiber) binds this contract.
+            // Without one, templates that never request a component are
+            // unaffected; requesting one fails with a clear error.
+            $components = $container->bound(ComponentRendererContract::class)
+                ? $container->make(ComponentRendererContract::class)
+                : null;
+
+            return new ViewEngine($resolver, $compiler, $assets, $components);
         });
 
         // Ergonomics: `$container->make('view')` for the common case.

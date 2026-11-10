@@ -22,7 +22,7 @@
     ],
     "require": {
         "php": "^8.4",
-        "sahilphp/framework": "^1.1"
+        "sahilphp/framework": "^1.2"
     },
     "require-dev": {
         "phpunit/phpunit": "^10.5"
