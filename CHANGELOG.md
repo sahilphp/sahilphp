@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 ## [Unreleased]
 
 ### Fixed
+- Maintainer-only test applications (`test-app3`, `test-app7`, ...) are no
+  longer part of the distributed starter kit (`.gitattributes`
+  `export-ignore` and `composer archive.exclude`), so generated projects no
+  longer inherit them.
 - The starter application no longer ships the three authentication migrations
   (`users`, `password_reset_tokens`, `sessions`); `unda:auth` owns them, so a
   new project can run `php sahil unda:migration create_users_table` without a

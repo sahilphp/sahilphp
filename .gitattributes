@@ -23,6 +23,11 @@
 /.phpunit.cache          export-ignore
 /vendor                  export-ignore
 
+# Maintainer-only test applications (`test-app3`, `test-app7`, ...) are
+# scratch space: they must never reach a user's generated project.
+/test-*                  export-ignore
+/test_*                  export-ignore
+
 # License: starter kit does NOT ship framework LICENSE into user project
 LICENSE                export-ignore
 

@@ -21,8 +21,8 @@
         "framework"
     ],
     "require": {
-        "php": "^8.4",
-        "sahilphp/framework": "^1.2"
+        "php": "^8.3",
+        "sahilphp/framework": "^1.3"
     },
     "require-dev": {
         "phpunit/phpunit": "^10.5"
@@ -59,6 +59,8 @@
             "/node_modules",
             "/package-lock.json",
             "/public/build",
+            "/test-*",
+            "/test_*",
             "/tests",
             "/vendor"
         ]
