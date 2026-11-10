@@ -66,4 +66,48 @@ final class SahilCliCommandsTest extends ApplicationTestCase
             ->assertOutputContains('SahilPHP')
             ->assertOutputContains(PHP_VERSION);
     }
+
+    public function test_help_documents_unda_generators_and_never_the_internal_binary_path(): void
+    {
+        $this->runCommand([])
+            ->assertSuccessful()
+            ->assertOutputContains('Code Generation')
+            ->assertOutputContains('unda:controller')
+            ->assertOutputContains('unda:model')
+            ->assertOutputContains('unda:migration')
+            ->assertOutputContains('unda:middleware')
+            ->assertOutputContains('unda:policy')
+            ->assertOutputContains('unda:job')
+            ->assertOutputContains('php sahil <command>')
+            ->assertOutputMissing('bin/sahil')
+            ->assertOutputMissing('make:controller');
+    }
+
+    public function test_generators_write_to_an_explicit_application_root(): void
+    {
+        $root = $this->tempDirectory('sahil-generator-app');
+        mkdir($root.'/app', 0700, true);
+
+        file_put_contents($root.'/composer.json', json_encode([
+            'name' => 'acme/application',
+            'autoload' => ['psr-4' => ['Acme\\' => 'app/']],
+        ], JSON_PRETTY_PRINT | JSON_THROW_ON_ERROR));
+
+        $this->runCommand(['unda:controller', 'Admin/UserController', '--path='.$root])
+            ->assertSuccessful()
+            ->assertOutputContains('app/Http/Controllers/Admin/UserController.php')
+            ->assertOutputContains('namespace Acme\\Http\\Controllers\\Admin');
+
+        $file = $root.'/app/Http/Controllers/Admin/UserController.php';
+        self::assertFileExists($file);
+        self::assertStringContainsString(
+            'namespace Acme\\Http\\Controllers\\Admin;',
+            (string) file_get_contents($file),
+        );
+
+        $lint = [];
+        $status = 0;
+        exec(escapeshellarg(PHP_BINARY).' -l '.escapeshellarg($file).' 2>&1', $lint, $status);
+        self::assertSame(0, $status, implode("\n", $lint));
+    }
 }

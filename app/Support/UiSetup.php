@@ -327,6 +327,7 @@ use RuntimeException;
         ]));
 
         $this->configureProviders($root, $uiKit);
+        $this->configureCommands($root, $uiKit);
 
         $this->removeTree($stubRoot);
     }
@@ -334,7 +335,7 @@ use RuntimeException;
     /**
      * Wire only the selected UI kit's service provider into the generated
      * project's provider manifest. The starter-kit ships a hard-coded
-     * reference to Sahil\Firefiber\FirefighterServiceProvider; every other
+     * reference to Sahil\Firefiber\FirefiberServiceProvider; every other
      * kit must not reference a package that was not installed, otherwise the
      * application cannot boot.
      */  private function configureProviders(string $root, string $uiKit): void
@@ -358,6 +359,40 @@ use RuntimeException;
 
             if (str_contains($content, $anchor) && !str_contains($content, trim($insert))) {
                 $content = str_replace($anchor, $anchor.$insert, $content);
+            }
+        }
+
+        file_put_contents($file, $content);
+    }
+
+    /**
+     * Register the package's console generators when Firefiber is selected.
+     *
+     * The framework console discovers application commands from
+     * `bootstrap/commands.php`; the Firefiber command classes therefore stay
+     * in the installed package instead of being copied into the application.
+     */  private function configureCommands(string $root, string $uiKit): void
+    {
+        $file = $root . '/bootstrap/commands.php';
+        if (!is_file($file)) {
+            return;
+        }
+
+        $content = (string) file_get_contents($file);
+        $content = (string) preg_replace(
+            '/^[ \t]*\\\\Sahil\\\\Firefiber\\\\Console\\\\Commands\\\\Firefiber(?:Page|Component)Command::class,.*(?:\R|$)/m',
+            '',
+            $content,
+        );
+
+        if ($uiKit === 'firefiber') {
+            $insert = "    \\Sahil\\Firefiber\\Console\\Commands\\FirefiberPageCommand::class,\n"
+                . "    \\Sahil\\Firefiber\\Console\\Commands\\FirefiberComponentCommand::class,\n";
+
+            if (preg_match('/return\s*\[\s*\];/s', $content) === 1) {
+                $content = (string) preg_replace('/return\s*\[\s*\];/s', "return [\n".$insert."];\n", $content, 1);
+            } elseif (preg_match('/return\s*\[/', $content) === 1) {
+                $content = (string) preg_replace('/return\s*\[/', "return [\n".$insert, $content, 1);
             }
         }
 

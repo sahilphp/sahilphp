@@ -24,6 +24,10 @@ final class UiSetupCommandTest extends TestCase
 
         // `ui:setup` operates on the project's own stubs tree.
         $this->copyTree(dirname(__DIR__, 2) . '/stubs', $this->project . '/stubs');
+        if (!is_dir($this->project . '/bootstrap') && !mkdir($this->project . '/bootstrap', 0o777, true) && !is_dir($this->project . '/bootstrap')) {
+            self::fail('Unable to create bootstrap directory.');
+        }
+        copy(dirname(__DIR__, 2) . '/bootstrap/commands.php', $this->project . '/bootstrap/commands.php');
     }
 
     protected function tearDown(): void
@@ -139,6 +143,14 @@ final class UiSetupCommandTest extends TestCase
         [$code] = $this->runCommand([], '--ui-kit=firefiber', '--css=tailwind');
         self::assertSame(0, $code);
 
+        $layout = (string) file_get_contents($this->project . '/resources/views/layouts/app.sahil.php');
+        self::assertStringContainsString("@asset_css('@fiberstyles')", $layout);
+        self::assertStringContainsString("@asset_js('@fiberscripts')", $layout);
+        self::assertStringContainsString('window.Firefiber.boot()', (string) file_get_contents($this->project . '/resources/js/app.js'));
+        $commands = (string) file_get_contents($this->project . '/bootstrap/commands.php');
+        self::assertStringContainsString('FirefiberPageCommand::class', $commands);
+        self::assertStringContainsString('FirefiberComponentCommand::class', $commands);
+
         $package = $this->package();
         self::assertArrayNotHasKey('react', $package['dependencies'] ?? []);
         self::assertArrayNotHasKey('vue', $package['dependencies'] ?? []);
@@ -147,9 +159,12 @@ final class UiSetupCommandTest extends TestCase
         $this->removeTree($this->project);
         mkdir($this->project, 0o777, true);
         $this->copyTree(dirname(__DIR__, 2) . '/stubs', $this->project . '/stubs');
+        mkdir($this->project . '/bootstrap', 0o777, true);
+        copy(dirname(__DIR__, 2) . '/bootstrap/commands.php', $this->project . '/bootstrap/commands.php');
 
         [$code] = $this->runCommand([], '--ui-kit=none', '--css=tailwind');
         self::assertSame(0, $code);
+        self::assertStringNotContainsString('FirefiberPageCommand::class', (string) file_get_contents($this->project . '/bootstrap/commands.php'));
 
         $package = $this->package();
         self::assertArrayNotHasKey('react', $package['dependencies'] ?? []);

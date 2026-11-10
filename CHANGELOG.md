@@ -7,7 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 ## [Unreleased]
 
 ### Fixed
-- `php sahil make:auth` now scaffolds the complete authentication system in one
+- The starter application no longer ships the three authentication migrations
+  (`users`, `password_reset_tokens`, `sessions`); `unda:auth` owns them, so a
+  new project can run `php sahil unda:migration create_users_table` without a
+  name conflict.
+- `php sahil unda:auth` now scaffolds the complete authentication system in one
   command: `User` model, users/reset-token/sessions migrations, four auth
   controllers, `Authenticate` / `RedirectIfAuthenticated` middleware,
   `routes/auth.php`, and the auth/dashboard views. It also adds the auth route
