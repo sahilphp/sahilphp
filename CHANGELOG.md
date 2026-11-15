@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 ## [Unreleased]
 
 ### Fixed
+- `php sahil ui:setup` now wires the selected UI kit's service provider into
+  `bootstrap/providers.php`: React/Vue/Svelte projects register the kit's
+  `App\Providers\FrontendServiceProvider`, Firefiber keeps
+  `Sahil\Firefiber\FirefiberServiceProvider`, and every kit keeps the new
+  `App\Providers\HtmlProvider` that binds the native `html` render adapter.
+  Previously only Firefiber was wired, so `react`/`vue`/`svelte`/`none`
+  projects booted without any `RenderManager` adapter and every rendered
+  page failed with `No render adapter for environment [html]` (HTTP 500).
 - Maintainer-only test applications (`test-app3`, `test-app7`, ...) are no
   longer part of the distributed starter kit (`.gitattributes`
   `export-ignore` and `composer archive.exclude`), so generated projects no

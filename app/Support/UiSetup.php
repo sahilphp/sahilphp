@@ -333,11 +333,15 @@ use RuntimeException;
     }
 
     /**
-     * Wire only the selected UI kit's service provider into the generated
-     * project's provider manifest. The starter-kit ships a hard-coded
-     * reference to Sahil\Firefiber\FirefiberServiceProvider; every other
-     * kit must not reference a package that was not installed, otherwise the
-     * application cannot boot.
+     * Wire the selected UI kit's service provider into the generated
+     * project's provider manifest.
+     *
+     * Every project keeps `App\Providers\HtmlProvider` — the native `html`
+     * adapter the base controllers render through. JavaScript kits
+     * (react, vue, svelte) ship `App\Providers\FrontendServiceProvider`
+     * inside their Composer package (`App\` → `app/`); Firefiber ships
+     * `Sahil\Firefiber\FirefiberServiceProvider`. The kit provider must be
+     * registered after `HtmlProvider` so its `RenderManager` binding wins.
      */  private function configureProviders(string $root, string $uiKit): void
     {
         $file = $root . '/bootstrap/providers.php';
@@ -346,6 +350,9 @@ use RuntimeException;
         }
 
         $content = (string) file_get_contents($file);
+
+        // Strip any stale firefiber reference left by older manifests —
+        // it must never point at a package that was not installed.
         $providerLine = preg_quote('\\Sahil\\Firefiber\\FirefiberServiceProvider::class,', '/');
         $content = preg_replace(
             '/^[ \t]*'.$providerLine.'.*(?:\R[ \t]*\/\/.*)*\R/m',
@@ -353,12 +360,26 @@ use RuntimeException;
             $content,
         ) ?? $content;
 
-        if ($uiKit === 'firefiber') {
-            $anchor = "    \\App\\Providers\\AssetProvider::class,\n";
-            $insert = "    \\Sahil\\Firefiber\\FirefiberServiceProvider::class,\n";
+        // Guarantee the native `html` adapter binding even on manifests
+        // that predate HtmlProvider.
+        $htmlLine = "    \\App\\Providers\\HtmlProvider::class,\n";
+        $assetAnchor = "    \\App\\Providers\\AssetProvider::class,\n";
 
-            if (str_contains($content, $anchor) && !str_contains($content, trim($insert))) {
-                $content = str_replace($anchor, $anchor.$insert, $content);
+        if (!str_contains($content, trim($htmlLine)) && str_contains($content, $assetAnchor)) {
+            $content = str_replace($assetAnchor, $assetAnchor.$htmlLine, $content);
+        }
+
+        $kitProvider = match ($uiKit) {
+            'firefiber' => '\\Sahil\\Firefiber\\FirefiberServiceProvider::class',
+            'react', 'vue', 'svelte' => '\\App\\Providers\\FrontendServiceProvider::class',
+            default => null,
+        };
+
+        if ($kitProvider !== null) {
+            $insert = "    {$kitProvider},\n";
+
+            if (!str_contains($content, trim($insert)) && str_contains($content, $htmlLine)) {
+                $content = str_replace($htmlLine, $htmlLine.$insert, $content);
             }
         }
 

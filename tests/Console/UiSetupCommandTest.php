@@ -28,6 +28,7 @@ final class UiSetupCommandTest extends TestCase
             self::fail('Unable to create bootstrap directory.');
         }
         copy(dirname(__DIR__, 2) . '/bootstrap/commands.php', $this->project . '/bootstrap/commands.php');
+        copy(dirname(__DIR__, 2) . '/bootstrap/providers.php', $this->project . '/bootstrap/providers.php');
     }
 
     protected function tearDown(): void
@@ -244,6 +245,76 @@ final class UiSetupCommandTest extends TestCase
 
             copy($item->getPathname(), $target);
         }
+    }
+
+    /**
+     * The generated manifest must keep the native `html` adapter
+     * (`HtmlProvider`) and register the selected kit's provider after it —
+     * otherwise `Render::html()`/kit environments hit an unbound
+     * `RenderManager` and every page 500s.
+     *
+     * @return array<int, string>
+     */
+    private function providers(): array
+    {
+        $content = (string) file_get_contents($this->project . '/bootstrap/providers.php');
+
+        return array_map('trim', explode("\n", $content));
+    }
+
+    public function test_vue_registers_the_kit_frontend_provider_after_html(): void
+    {
+        [$code] = $this->runCommand([], '--ui-kit=vue', '--css=tailwind');
+        self::assertSame(0, $code);
+
+        $providers = $this->providers();
+        $html = array_search('\App\Providers\HtmlProvider::class,', $providers, true);
+        $kit = array_search('\App\Providers\FrontendServiceProvider::class,', $providers, true);
+
+        self::assertNotFalse($html, 'HtmlProvider missing from manifest');
+        self::assertNotFalse($kit, 'FrontendServiceProvider missing from manifest');
+        self::assertGreaterThan($html, $kit, 'kit provider must register after HtmlProvider');
+        self::assertNotContains('\Sahil\Firefiber\FirefiberServiceProvider::class,', $providers);
+    }
+
+    public function test_react_and_svelte_register_the_kit_frontend_provider(): void
+    {
+        foreach (['react', 'svelte'] as $kit) {
+            $this->tearDown();
+            $this->setUp();
+
+            [$code] = $this->runCommand([], '--ui-kit=' . $kit, '--css=tailwind');
+            self::assertSame(0, $code, $kit);
+
+            $providers = $this->providers();
+            self::assertContains('\App\Providers\FrontendServiceProvider::class,', $providers, $kit);
+            self::assertNotContains('\Sahil\Firefiber\FirefiberServiceProvider::class,', $providers, $kit);
+        }
+    }
+
+    public function test_none_keeps_only_the_native_html_provider(): void
+    {
+        [$code] = $this->runCommand([], '--ui-kit=none', '--css=tailwind');
+        self::assertSame(0, $code);
+
+        $providers = $this->providers();
+        self::assertContains('\App\Providers\HtmlProvider::class,', $providers);
+        self::assertNotContains('\App\Providers\FrontendServiceProvider::class,', $providers);
+        self::assertNotContains('\Sahil\Firefiber\FirefiberServiceProvider::class,', $providers);
+    }
+
+    public function test_firefiber_registers_the_firefiber_provider_after_html(): void
+    {
+        [$code] = $this->runCommand([], '--ui-kit=firefiber', '--css=tailwind');
+        self::assertSame(0, $code);
+
+        $providers = $this->providers();
+        $html = array_search('\App\Providers\HtmlProvider::class,', $providers, true);
+        $fire = array_search('\Sahil\Firefiber\FirefiberServiceProvider::class,', $providers, true);
+
+        self::assertNotFalse($html);
+        self::assertNotFalse($fire);
+        self::assertGreaterThan($html, $fire);
     }
 
     private function removeTree(string $path): void
