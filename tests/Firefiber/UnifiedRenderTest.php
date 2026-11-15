@@ -34,6 +34,38 @@ final class UnifiedRenderTest extends TestCase
 
         self::assertContains('html', $manager->environments());
         self::assertContains('fire', $manager->environments());
+        self::assertContains('fiber', $manager->environments());
+    }
+
+    public function test_fire_resolves_page_templates_under_firefiber_pages(): void
+    {
+        $this->boot();
+
+        // `resources/views/firefiber/pages/admin_users.sahil.php` is the
+        // conventional location; `fire()` finds it without a class name.
+        $response = Render::fire('admin_users', ['page_title' => 'Admin Users', 'components' => []]);
+
+        self::assertSame(200, $response->status());
+        self::assertStringContainsString('Admin Users', $response->body());
+        self::assertStringContainsString('<main', $response->body());
+    }
+
+    public function test_fiber_alias_resolves_the_same_page_template(): void
+    {
+        $this->boot();
+
+        $response = Render::fiber('admin_users', ['page_title' => 'Admin Users', 'components' => []]);
+
+        self::assertStringContainsString('Admin Users', $response->body());
+    }
+
+    public function test_fire_falls_back_to_component_names(): void
+    {
+        $this->boot();
+
+        $response = Render::fire('AdminUsersTable', ['search' => 'a']);
+
+        self::assertStringContainsString('data-firefiber-component', $response->body());
     }
 
     public function test_fire_renders_real_component_markup(): void

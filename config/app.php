@@ -11,7 +11,7 @@ return [
     // Encryption and signing key (`base64:` + 32 random bytes). Generate one
     // with `php sahil key:generate`; never commit a real value.
     'key' => env('APP_KEY'),
-    'environment' => env('APP_ENV', 'development'),
+    'environment' => env('APP_ENV', 'production'),
     'debug' => env('APP_DEBUG', false),
     'url' => env('APP_URL', 'http://localhost:8000'),
     // Active display language. SahilPHP ships Kiswahili as its default;

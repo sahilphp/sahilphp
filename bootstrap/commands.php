@@ -19,4 +19,7 @@ declare(strict_types=1);
  *
  * @return list<class-string>
  */
-return [];
+return [
+    \Sahil\Firefiber\Console\Commands\FirefiberPageCommand::class,
+    \Sahil\Firefiber\Console\Commands\FirefiberComponentCommand::class,
+];

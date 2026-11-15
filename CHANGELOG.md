@@ -6,6 +6,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Added
+- `resources/views/firefiber/pages/admin_users.sahil.php`: the starter
+  Firefiber page (`App\Firefiber\Pages\AdminUsersPage`) now renders through
+  the conventional `firefiber.pages.*` template under
+  `resources/views/firefiber/pages`, and `Render::fire('admin_users')` /
+  `$this->fiber('admin_users')` resolve the same template through the
+  unified render API.
+### Changed
+- Fresh projects are configured for local development: `.env.example` ships
+  `APP_ENV=local` and `APP_DEBUG=true`, so `sahilphp new` projects show the
+  detailed exception diagnostics (message, source location, stack trace,
+  request and route context) while `APP_ENV=production`/`APP_DEBUG=false`
+  keeps the generic production responses. The `app.environment` default when
+  no `.env` exists is now `production` (fail-safe).
 ### Fixed
 - `php sahil ui:setup` now wires the selected UI kit's service provider into
   `bootstrap/providers.php`: React/Vue/Svelte projects register the kit's

@@ -110,7 +110,7 @@ final class ObservabilityProvider extends ServiceProvider
                 ->config()->get('app.debug') === true;
 
             $container->instance(Kernel::class, $kernel->usingExceptionHandler(
-                static function (\Throwable $throwable, ?Request $request = null) use ($handler, $debug): ?\Sahil\Http\Response {
+                static function (\Throwable $throwable, ?Request $request = null, ?\Sahil\Http\RouteMatch $route = null) use ($handler, $debug): ?\Sahil\Http\Response {
                     // Validation failures are ordinary responses — the kernel
                     // turns them into the 303/422 contract itself — not
                     // reportable errors.
@@ -120,7 +120,7 @@ final class ObservabilityProvider extends ServiceProvider
 
                     $handler->report($throwable, $request);
 
-                    return $handler->render($throwable, $debug, $request);
+                    return $handler->render($throwable, $debug, $request, $route);
                 }
             ));
         }
