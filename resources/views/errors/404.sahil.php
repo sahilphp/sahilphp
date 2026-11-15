@@ -1,6 +1,6 @@
 @extends('errors.layout')
 
-@section('title')Page not found@endsection
+@section('title'){{ __('errors.page_missing') }}@endsection
 
 @section('head')
     <style>
@@ -69,29 +69,25 @@
 @endsection
 
 @section('content')
-    <h1>This page could not be found</h1>
-    <p>
-        We looked everywhere on this server for the page you asked for, but it does not
-        exist or it has been moved. Check the address for a typo, or start again from one
-        of these pages.
-    </p>
+    <h1>{{ __('errors.page_missing') }}</h1>
+    <p>{{ __('errors.page_missing_detail') }}</p>
 
     <div class="error__trail" aria-hidden="true">
         <span></span><span></span><span></span>
-        <em>end of the trail</em>
+        <em>{{ __('errors.trail_end') }}</em>
     </div>
 
     <nav class="error__routes" aria-label="Popular pages">
         <a class="error__route" href="/">
-            <strong>Home</strong>
+            <strong>{{ __('errors.nav_home') }}</strong>
             <small>/</small>
         </a>
         <a class="error__route" href="/ui-kit">
-            <strong>UI kit</strong>
+            <strong>{{ __('errors.nav_uikit') }}</strong>
             <small>/ui-kit</small>
         </a>
         <a class="error__route" href="/health">
-            <strong>Health</strong>
+            <strong>{{ __('errors.nav_health') }}</strong>
             <small>/health</small>
         </a>
     </nav>

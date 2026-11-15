@@ -3,6 +3,6 @@
 @section('title')Server error@endsection
 
 @section('content')
-    <h1>Something went wrong on our end</h1>
-    <p>We hit an unexpected error while rendering this page. The details were logged; please try again in a moment.</p>
+    <h1>{{ __('errors.server_error_title') }}</h1>
+    <p>{{ __('errors.server_error_detail') }}</p>
 @endsection

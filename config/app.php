@@ -14,7 +14,25 @@ return [
     'environment' => env('APP_ENV', 'development'),
     'debug' => env('APP_DEBUG', false),
     'url' => env('APP_URL', 'http://localhost:8000'),
-    'locale' => env('APP_LOCALE', 'en'),
+    // Active display language. SahilPHP ships Kiswahili as its default;
+    // point APP_LOCALE at any entry of APP_AVAILABLE_LOCALES to change it.
+    'locale' => env('APP_LOCALE', 'sw'),
+    // Consulted when a message is missing in the active locale.
+    'fallback_locale' => env('APP_FALLBACK_LOCALE', 'sw'),
+    // Locales the application may serve. The default and fallback are always
+    // implicitly supported; set() rejects anything not listed here.
+    'available_locales' => array_values(array_filter(array_map(
+        trim(...),
+        explode(',', (string) env('APP_AVAILABLE_LOCALES', 'sw,en')),
+    ))),
+    // Where translation files live: lang/{locale}/{group}.php.
+    'translations_path' => env('APP_TRANSLATIONS_PATH') ?: dirname(__DIR__).'/lang',
+    // Request locale selection (used by Sahil\Http\Middleware\SetLocale):
+    // explicit ?lang= query parameter, a stored session preference and
+    // Accept-Language negotiation, in that order.
+    'locale_parameter' => env('APP_LOCALE_PARAMETER', 'lang'),
+    'locale_session_key' => env('APP_LOCALE_SESSION_KEY', 'locale'),
+    'locale_negotiate' => env('APP_LOCALE_NEGOTIATE', true),
     'timezone' => env('APP_TIMEZONE', 'UTC'),
     'log_level' => env('APP_LOG_LEVEL', 'info'),
     'request_id' => [

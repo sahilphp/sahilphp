@@ -74,8 +74,9 @@ final class HttpEntryPointTest extends TestCase
         self::assertSame(404, $status);
         self::assertSame('text/html; charset=utf-8', $contentType, 'a browser gets a page, not a JSON body');
         self::assertStringContainsString('<!doctype html>', $body);
-        self::assertStringContainsString('This page could not be found', $body);
-        self::assertStringContainsString('Back to home', $body);
+        // The starter kit defaults to Kiswahili (APP_LOCALE=sw).
+        self::assertStringContainsString('Ukurasa huu haujapatikana', $body);
+        self::assertStringContainsString('Rudi kwenye ukurasa wa mwanzo', $body);
         self::assertStringNotContainsString('http_error', $body);
         self::assertStringNotContainsString('laravel', strtolower($body));
     }

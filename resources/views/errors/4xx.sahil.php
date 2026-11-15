@@ -3,6 +3,6 @@
 @section('title')Request error@endsection
 
 @section('content')
-    <h1>This request could not be completed</h1>
-    <p>The server rejected the request ({{ reason }}). Check what you sent, then try again.</p>
+    <h1>{{ __('errors.request_error_title') }}</h1>
+    <p>{{ __('errors.request_error_detail', ['reason' => reason]) }}</p>
 @endsection

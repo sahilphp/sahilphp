@@ -17,15 +17,15 @@
         </div>
     @endif
 
-    <form method="post" action="/forgot-password" novalidate>
-        <input type="hidden" name="_token" value="{{ csrf_token }}">
+    <form method="post" action="{{ link('password.email') }}" novalidate>
+        @csrf
 
         <div class="mb-4">
             <label class="form-label small fw-medium" for="email">Email</label>
-            <input class="form-control@if (errors.email ?? null) is-invalid@endif" id="email" name="email" type="email"
+            <input class="form-control@if (error('email', 'forgot')) is-invalid@endif" id="email" name="email" type="email"
                 value="{{ old.email ?? '' }}" placeholder="you@example.com" autocomplete="email" required>
-            @if (errors.email ?? null)
-                <div class="invalid-feedback" id="email-error">{{ errors.email }}</div>
+            @if (error('email', 'forgot'))
+                <div class="invalid-feedback" id="email-error">{{ error('email', 'forgot') }}</div>
             @endif
         </div>
 
@@ -33,6 +33,6 @@
     </form>
 
     <p class="text-center small mt-4 mb-0">
-        <a class="text-decoration-none fw-medium" href="/login">← Back to sign in</a>
+        <a class="text-decoration-none fw-medium" href="{{ link('login') }}">← Back to sign in</a>
     </p>
 @endsection

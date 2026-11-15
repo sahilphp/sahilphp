@@ -44,3 +44,6 @@
 # Audit backup (never distributed)
 /composer.json.backup
 composer.lock
+
+# PHP CS Fixer configuration
+/.php-cs-fixer.php

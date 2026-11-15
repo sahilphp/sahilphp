@@ -7,23 +7,23 @@ use Sahil\Scheduler\Schedule;
 /**
  * Scheduled tasks for this installation.
  *
- * Loaded once by App\Providers\ScheduleProvider. Each task is a PHP callable
- * with a unique name; the name is what `schedule:list`, `schedule:run
- * --only=NAME` and the overlap lock refer to.
+ * `php sahil schedule:run` evaluates this file on every invocation —
+ * wire it to run each minute from system cron:
  *
- *   $schedule->call('prune-temp-uploads', static function (): void {
- *       // ...
- *   })
- *       ->dailyAt('03:30')
- *       ->inTimezone('Europe/Berlin')
- *       ->withoutOverlapping()
- *       ->timeoutAfter(300)
- *       ->describe('Delete temporary exports older than a day.');
+ *     * * * * * cd /path/to/app && php sahil schedule:run >> /dev/null 2>&1
  *
- * Available schedules: everyMinute(), every(N), hourly(), hourlyAt(M),
- * daily(), dailyAt('HH:MM'), weekly(), weeklyOn(0-6, 'HH:MM'), monthly(),
- * monthlyOn(1-31, 'HH:MM'), cron('* * * * *').
+ * `$schedule->job()` hands the job to the queue when due (retries and
+ * failed-job handling stay with the queue); `jobSync()` and `call()`
+ * run inline in the scheduler process.
  */
 return static function (Schedule $schedule): void {
-    // Register this installation's tasks here.
+    // Queued work — a worker picks it up.
+    $schedule->job(new \App\Jobs\SchedulerHeartbeat())
+        ->everyFifteenMinutes()
+        ->withoutOverlapping();
+
+    // Inline maintenance — cheap tasks that don't need a worker.
+    $schedule->call('prune-stale-locks', static function (): void {
+        // e.g. clear expired scheduler lock files.
+    })->daily();
 };

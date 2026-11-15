@@ -56,7 +56,8 @@
             <h2 class="mb-3 text-xl font-semibold text-slate-900" id="ui-kit-form">Form</h2>
 
             <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-                <form method="post" action="/ui-kit">
+                <form method="post" action="{{ link('ui-kit') }}">
+                        @csrf
                     <div class="grid gap-4 md:grid-cols-2">
                         @include('partials.field', [
                             'wrapper_class' => 'space-y-1',

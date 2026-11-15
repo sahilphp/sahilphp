@@ -1,10 +1,10 @@
 @extends('errors.layout')
 
-@section('title')Sign in required@endsection
+@section('title'){{ __('errors.signin_required_title') }}@endsection
 
 @section('content')
-    <h1>Please sign in to continue</h1>
-    <p>This page is only available to signed-in users. Sign in and we will take you right back here.</p>
+    <h1>{{ __('errors.signin_required_title') }}</h1>
+    <p>{{ __('errors.signin_required_detail') }}</p>
 @endsection
 
 @section('actions')

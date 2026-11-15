@@ -15,29 +15,29 @@
             </div>
         @endif
 
-        <form class="space-y-4" method="post" action="/login" novalidate>
-            <input type="hidden" name="_token" value="{{ csrf_token }}">
+        <form class="space-y-4" method="post" action="{{ link('login.store') }}" novalidate>
+            @csrf
 
             <div class="space-y-2">
                 <label class="text-sm font-medium leading-none" for="email">Email</label>
-                <input class="flex h-10 w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm shadow-sm transition placeholder:text-slate-400 focus-visible:border-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30@if (errors.email ?? null) border-red-400 focus-visible:border-red-400 focus-visible:ring-red-200@endif"
+                <input class="flex h-10 w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm shadow-sm transition placeholder:text-slate-400 focus-visible:border-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30@if (error('email', 'login')) border-red-400 focus-visible:border-red-400 focus-visible:ring-red-200@endif"
                     id="email" name="email" type="email" value="{{ old.email ?? '' }}" placeholder="you@example.com"
                     autocomplete="email" required>
-                @if (errors.email ?? null)
-                    <p class="text-xs font-medium text-red-600" id="email-error">{{ errors.email }}</p>
+                @if (error('email', 'login'))
+                    <p class="text-xs font-medium text-red-600" id="email-error">{{ error('email', 'login') }}</p>
                 @endif
             </div>
 
             <div class="space-y-2">
                 <div class="flex items-center justify-between">
                     <label class="text-sm font-medium leading-none" for="password">Password</label>
-                    <a class="text-xs font-medium text-primary hover:underline" href="/forgot-password">Forgot password?</a>
+                    <a class="text-xs font-medium text-primary hover:underline" href="{{ link('password.request') }}">Forgot password?</a>
                 </div>
-                <input class="flex h-10 w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm shadow-sm transition placeholder:text-slate-400 focus-visible:border-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30@if (errors.password ?? null) border-red-400 focus-visible:border-red-400 focus-visible:ring-red-200@endif"
+                <input class="flex h-10 w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm shadow-sm transition placeholder:text-slate-400 focus-visible:border-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30@if (error('password', 'login')) border-red-400 focus-visible:border-red-400 focus-visible:ring-red-200@endif"
                     id="password" name="password" type="password" placeholder="••••••••"
                     autocomplete="current-password" required>
-                @if (errors.password ?? null)
-                    <p class="text-xs font-medium text-red-600" id="password-error">{{ errors.password }}</p>
+                @if (error('password', 'login'))
+                    <p class="text-xs font-medium text-red-600" id="password-error">{{ error('password', 'login') }}</p>
                 @endif
             </div>
 
@@ -53,7 +53,7 @@
 
         <p class="text-center text-sm text-slate-500">
             Don't have an account?
-            <a class="font-medium text-primary hover:underline" href="/register">Create one</a>
+            <a class="font-medium text-primary hover:underline" href="{{ link('register') }}">Create one</a>
         </p>
     </div>
 @endsection

@@ -6,7 +6,7 @@ namespace App\Http;
 
 use Sahil\Contracts\Assets\AssetManagerContract;
 use Sahil\Contracts\Foundation\ApplicationContract;
-use Sahil\Contracts\View\ViewContract;
+use Sahil\Http\Concerns\RendersPages;
 use Sahil\Http\Response;
 
 /**
@@ -18,8 +18,9 @@ use Sahil\Http\Response;
  */
 final class UiKitController
 {
+    use RendersPages;
+
     public function __construct(
-        private readonly ViewContract $views,
         private readonly AssetManagerContract $assets,
         private readonly ApplicationContract $application,
     ) {
@@ -42,7 +43,7 @@ final class UiKitController
             'none' => 'Plain CSS profile',
         ];
 
-        return Response::html($this->views->render($view, [
+        return $this->html($view, [
             'app_name' => (string) $this->application->config()->get('app.name', 'SahilPHP'),
             'heading' => 'A functional UI page',
             'intro' => 'This page uses shared layout, navigation and component partials. '
@@ -86,6 +87,6 @@ final class UiKitController
                 ['Grace Hopper', 'grace@example.com', 'Administrator', 'Active'],
                 ['Alan Turing', 'alan@example.com', 'Viewer', 'Invited'],
             ],
-        ]));
+        ]);
     }
 }

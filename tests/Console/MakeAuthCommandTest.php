@@ -139,15 +139,15 @@ final class MakeAuthCommandTest extends TestCase
         $this->runCommand('--ui=tailwind');
 
         $routes = (string) file_get_contents($this->project . '/routes/auth.php');
-        self::assertStringContainsString("Route::get('/login'", $routes);
-        self::assertStringContainsString("Route::post('/login'", $routes);
-        self::assertStringContainsString("Route::get('/register'", $routes);
-        self::assertStringContainsString("Route::post('/register'", $routes);
-        self::assertStringContainsString("Route::get('/forgot-password'", $routes);
-        self::assertStringContainsString("Route::post('/forgot-password'", $routes);
-        self::assertStringContainsString("Route::get('/reset-password/{token}'", $routes);
-        self::assertStringContainsString("Route::post('/reset-password'", $routes);
-        self::assertStringContainsString("Route::post('/logout'", $routes);
+        self::assertStringContainsString("Link::get('/login'", $routes);
+        self::assertStringContainsString("Link::post('/login'", $routes);
+        self::assertStringContainsString("Link::get('/register'", $routes);
+        self::assertStringContainsString("Link::post('/register'", $routes);
+        self::assertStringContainsString("Link::get('/forgot-password'", $routes);
+        self::assertStringContainsString("Link::post('/forgot-password'", $routes);
+        self::assertStringContainsString("Link::get('/reset-password/{token}'", $routes);
+        self::assertStringContainsString("Link::post('/reset-password'", $routes);
+        self::assertStringContainsString("Link::post('/logout'", $routes);
         self::assertStringContainsString("->name('login')", $routes);
         self::assertStringContainsString("->name('register')", $routes);
         self::assertStringContainsString('RedirectIfAuthenticated::class', $routes);
@@ -157,12 +157,12 @@ final class MakeAuthCommandTest extends TestCase
         self::assertStringContainsString('AuthManager', $login);
         self::assertStringContainsString('->attempt(', $login);
         self::assertStringContainsString('->logout()', $login);
-        self::assertStringContainsString("Response::redirect('/dashboard', 303)", $login);
+        self::assertStringContainsString("Response::redirect(link('dashboard'), 303)", $login);
 
         $register = (string) file_get_contents($this->project . '/app/Http/Controllers/Auth/RegisterController.php');
         self::assertStringContainsString('UserRepository', $register);
-        self::assertStringContainsString('password_confirmation', $register);
-        self::assertStringContainsString('length:8,255', $register);
+        self::assertStringContainsString("'password' => 'required|string|password|confirmed'", $register);
+        self::assertStringContainsString("bag: 'register'", $register);
 
         $forgot = (string) file_get_contents($this->project . '/app/Http/Controllers/Auth/ForgotPasswordController.php');
         self::assertStringContainsString('PasswordResetManager', $forgot);
@@ -202,11 +202,11 @@ final class MakeAuthCommandTest extends TestCase
         self::assertStringContainsString("\$table->integer('last_activity')", $sessions);
 
         $loginView = (string) file_get_contents($this->project . '/resources/views/auth/login.sahil.php');
-        self::assertStringContainsString('name="_token"', $loginView);
+        self::assertStringContainsString('@csrf', $loginView);
         self::assertStringContainsString('bg-primary', $loginView);
 
         $resetView = (string) file_get_contents($this->project . '/resources/views/auth/reset-password.sahil.php');
-        self::assertStringContainsString('action="/reset-password"', $resetView);
+        self::assertStringContainsString("action=\"{{ link('password.update') }}\"", $resetView);
         self::assertStringContainsString('name="token"', $resetView);
     }
 

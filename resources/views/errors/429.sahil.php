@@ -1,6 +1,6 @@
 @extends('errors.layout')
 
-@section('title')Too many requests@endsection
+@section('title'){{ __('errors.too_many_title') }}@endsection
 
 @section('head')
     <style>
@@ -81,16 +81,13 @@
 @endsection
 
 @section('content')
-    <h1>You are sending requests a little too fast</h1>
-    <p>
-        This address limits how many requests one client may make in a short window, and
-        your window is full. Nothing is broken — the limit resets on its own in a moment.
-    </p>
+    <h1>{{ __('errors.too_many_title') }}</h1>
+    <p>{{ __('errors.too_many_detail') }}</p>
 
     <div class="error__meter" role="img" aria-label="Request budget exhausted">
         <div class="error__meter-label">
-            <span>Request budget</span>
-            <span>Exhausted</span>
+            <span>{{ __('errors.ratelimit_budget') }}</span>
+            <span>{{ __('errors.ratelimit_exhausted') }}</span>
         </div>
         <div class="error__ticks" aria-hidden="true">
             <span></span><span></span><span></span><span></span><span></span><span></span>
@@ -100,9 +97,9 @@
     </div>
 
     <ul class="error__tips">
-        <li><strong>Wait a few seconds</strong>, then reload this page once — not repeatedly.</li>
-        <li>If you share this connection, another device may be using the same budget.</li>
-        <li>Calling the API? Honour the <code>Retry-After</code> response header before the next attempt.</li>
+        <li>{!! __('errors.ratelimit_step_wait') !!}</li>
+        <li>{{ __('errors.ratelimit_step_share') }}</li>
+        <li>{!! __('errors.ratelimit_step_retry') !!}</li>
     </ul>
 @endsection
 

@@ -91,8 +91,16 @@ final class AuthProvider extends ServiceProvider
             return $manager;
         });
 
-        // Register gate
+        // Register gate (legacy API; Bouncer is the primary authority)
         $container->singleton(Gate::class, static fn (): Gate => new Gate());
+
+        // Bouncer — the application's authorization authority. The user
+        // resolver stays a callable so the manager never caches
+        // request-scoped principals in a long-running worker.
+        $container->singleton(\Sahil\Auth\BouncerManager::class, static fn (Container $c): \Sahil\Auth\BouncerManager
+            => new \Sahil\Auth\BouncerManager(
+                static fn () => $c->make(AuthManager::class)->user(),
+            ));
 
         // Register policy manager
         $container->singleton(PolicyManager::class, static fn (): PolicyManager => new PolicyManager());
@@ -150,11 +158,15 @@ final class AuthProvider extends ServiceProvider
         $container->singleton(\Sahil\Http\Middleware\Authenticate::class, static fn (Container $c): \Sahil\Http\Middleware\Authenticate
             => new \Sahil\Http\Middleware\Authenticate($c->make(AuthManager::class)));
 
+        // `token:{ability}` route middleware — API-token ability ceiling.
+        $container->singleton(\Sahil\Http\Middleware\RequireTokenAbility::class, static fn (Container $c): \Sahil\Http\Middleware\RequireTokenAbility
+            => new \Sahil\Http\Middleware\RequireTokenAbility($c->make(AuthManager::class)));
+
         // Register authorization middleware
         $container->singleton(\Sahil\Http\Middleware\Authorize::class, static function (Container $container): \Sahil\Http\Middleware\Authorize {
             return new \Sahil\Http\Middleware\Authorize(
                 $container->make(AuthManager::class),
-                $container->make(Gate::class)
+                $container->make(\Sahil\Auth\BouncerManager::class)
             );
         });
     }

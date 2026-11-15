@@ -13,10 +13,10 @@
 
         <div class="d-flex gap-2">
             <a class="btn btn-outline-secondary btn-sm" href="/ui-kit">Components</a>
-            <a class="btn btn-primary btn-sm" href="/register">Invite member</a>
+            <a class="btn btn-primary btn-sm" href="{{ link('register') }}">Invite member</a>
 
-            <form method="post" action="/logout" class="d-inline">
-                <input type="hidden" name="_token" value="{{ csrf_token }}">
+            <form method="post" action="{{ link('logout') }}" class="d-inline">
+                @csrf
                 <button class="btn btn-outline-secondary btn-sm" type="submit">Sign out</button>
             </form>
         </div>

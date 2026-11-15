@@ -5,8 +5,12 @@ declare(strict_types=1);
 namespace App\Models;
 
 use RuntimeException;
+use Sahil\Auth\Authorizable;
+use Sahil\Auth\Tokens\HasApiTokens;
 use Sahil\Auth\Password;
 use Sahil\Contracts\Auth\AuthenticatableContract;
+use Sahil\Contracts\Notifications\NotifiableContract;
+use Sahil\Notifications\Notifiable;
 use Sahil\Orm\Model;
 
 /**
@@ -17,8 +21,17 @@ use Sahil\Orm\Model;
  * `email_verified_at` is exposed as a `DateTimeImmutable` by the ORM's
  * `datetime` cast.
  */
-final class User extends Model implements AuthenticatableContract
+final class User extends Model implements AuthenticatableContract, NotifiableContract
 {
+    /** `$user->can('update-post', $post)` backed by Bouncer. */
+    use Authorizable;
+
+    /** `$user->createToken('mobile', ['posts:read'])` for API clients. */
+    use HasApiTokens;
+
+    /** `$user->notify($n)` + `notifications()`/`unreadNotifications()`. */
+    use Notifiable;
+
     protected ?string $table = 'users';
 
     protected array $fillable = ['name', 'email'];
@@ -112,5 +125,18 @@ final class User extends Model implements AuthenticatableContract
     {
         $this->setRawAttribute('password', Password::hash($password, $options));
         $this->save();
+    }
+
+    /**
+     * Whether the user is an administrator.
+     *
+     * The stock `users` table has no role column — `manage-users` style
+     * Bouncer abilities read this, so add the column (or your own role
+     * source) when the application grows permissions. Until then it
+     * simply answers from the `role` attribute, defaulting to `user`.
+     */
+    public function isAdmin(): bool
+    {
+        return $this->get('role', 'user') === 'admin';
     }
 }

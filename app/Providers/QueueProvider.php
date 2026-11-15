@@ -66,6 +66,9 @@ final class QueueProvider extends ServiceProvider
                 (int) $configuration->get('queue.work.sleep', 1),
                 null,
                 $this->allowedJobClasses($configuration->get('queue.allowed_jobs')),
+                $c->has(\Sahil\Support\Logging\LoggerContract::class)
+                    ? $c->make(\Sahil\Support\Logging\LoggerContract::class)
+                    : null,
             );
         });
     }

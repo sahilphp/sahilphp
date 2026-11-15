@@ -19,14 +19,20 @@ return [
     \App\Providers\EncryptionProvider::class,
     \App\Providers\StorageProvider::class,
     \App\Providers\AuthProvider::class,
+    \App\Providers\AuthorizationProvider::class,
     \App\Providers\RateLimitProvider::class,
     \App\Providers\QueueProvider::class,
     \App\Providers\ScheduleProvider::class,
     \App\Providers\MailProvider::class,
+    \App\Providers\NotificationsProvider::class,
+    \App\Providers\EventsProvider::class,
+    \App\Providers\HttpClientProvider::class,
+    \App\Providers\WebhookProvider::class,
     \App\Providers\AssetProvider::class,
     \Sahil\Firefiber\FirefiberServiceProvider::class,    // Frontend provider injection point — each UI kit's `ui:setup` will
     // inject the appropriate provider (Firefiber, React, Vue, Svelte, or None).
     \App\Providers\ViewProvider::class,
     \App\Providers\WebRoutesProvider::class,
     \App\Providers\CacheProvider::class,
+    \App\Providers\OpenApiProvider::class,
 ];

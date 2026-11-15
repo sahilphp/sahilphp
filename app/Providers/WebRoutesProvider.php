@@ -8,7 +8,7 @@ use RuntimeException;
 use Sahil\Contracts\Foundation\ApplicationContract;
 use Sahil\Foundation\ServiceProvider;
 use Sahil\Http\Kernel;
-use Sahil\Http\Route;
+use Sahil\Routing\Link;
 use Sahil\Http\Router;
 
 /**
@@ -35,8 +35,13 @@ final class WebRoutesProvider extends ServiceProvider
                 return (new Kernel($container->make(Router::class), $container, $application))
                     ->useDebugMode($application->config()->get('app.debug') === true)
                     ->using($container->make(\Sahil\Http\Middleware\StartSession::class))
+                    // Resolve the request locale (?lang=, session, Accept-Language)
+                    // after sessions start so a stored preference can be read.
+                    ->using($container->make(\Sahil\Http\Middleware\SetLocale::class))
                     ->using($container->make(\Sahil\Http\Middleware\VerifyCsrfToken::class))
-                    ->using(new \Sahil\Http\Middleware\RequestIdMiddleware());
+                    ->using(new \Sahil\Http\Middleware\RequestIdMiddleware(
+                        logs: $container->make(\Sahil\Support\Logging\LogManager::class),
+                    ));
             }
         );
     }
@@ -69,13 +74,13 @@ final class WebRoutesProvider extends ServiceProvider
             $definitions = require $file;
 
             if (!is_array($definitions)) {
-                throw new RuntimeException(sprintf('%s must return an array of Sahil\Http\Route objects.', $relative));
+                throw new RuntimeException(sprintf('%s must return an array of Sahil\Routing\Link objects.', $relative));
             }
 
             foreach ($definitions as $definition) {
-                if (!$definition instanceof Route) {
+                if (!$definition instanceof Link) {
                     throw new RuntimeException(
-                        sprintf('%s must return Sahil\Http\Route entries, got %s.', $relative, get_debug_type($definition))
+                        sprintf('%s must return Sahil\Routing\Link entries, got %s.', $relative, get_debug_type($definition))
                     );
                 }
 

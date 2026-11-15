@@ -53,7 +53,8 @@
         <section class="ui-kit__form" aria-labelledby="ui-kit-form">
             <h2 id="ui-kit-form">Form</h2>
 
-            <form method="post" action="/ui-kit">
+            <form method="post" action="{{ link('ui-kit') }}">
+                        @csrf
                 @include('partials.field', [
                     'id' => 'name',
                     'label' => 'Name',

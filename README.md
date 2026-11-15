@@ -355,7 +355,10 @@ application's own `composer.json` PSR-4 map:
 ```bash
 php sahil unda:controller UserController
 php sahil unda:controller Admin/UserController
+php sahil unda:controller UserController -r      # resourceful controller
 php sahil unda:model User
+php sahil unda:model User -m                    # with migration
+php sahil unda:model User -cmr                  # with migration + resourceful controller
 php sahil unda:model Billing/Invoice --migration
 php sahil unda:migration create_posts_table
 php sahil unda:migration add_email_to_users_table
@@ -366,6 +369,11 @@ php sahil unda:command SendInvoice
 php sahil unda:job ProcessPayment
 php sahil unda:seeder UserSeeder
 ```
+
+`unda:model` generates related files together: `-m`/`--migration` adds the
+`create_<table>_table` migration, `-c`/`--controller` adds `<Name>Controller`
+and `-r`/`--resource` makes it a resourceful controller (`index`, `create`,
+`store`, `show`, `edit`, `update`, `destroy`).
 
 Every generator validates its name, refuses to overwrite an existing file
 unless `--force` is passed (originals are backed up under
@@ -395,6 +403,47 @@ Destructive operations (`migrate:rollback`, `db:seed`, schema changes in
 production) require `--force`. The CLI prints one clear error line instead of
 a stack trace.
 
+## API versioning
+
+`/api/v1` and `/api/v2` are registered in `routes/web.php` with
+`Link::version()` inside the `/api` prefix group — the same `Link`
+machinery, just a normalized `/vN` prefix plus per-route version
+metadata:
+
+```php
+...Link::prefix('/api')->group(fn () => [
+    ...Link::version('v1', fn () => [
+        Link::get('/users', [UserApiController::class, 'index'])->name('api.v1.users'),
+    ]),
+    ...Link::version('v2', fn () => [
+        Link::get('/users', [Api\V2\UserApiController::class, 'index'])->name('api.v2.users'),
+    ]),
+]),
+```
+
+- **V1** keeps the original `UserResource` shape; **V2**
+  (`app/Http/Api/V2/UserApiController`, `app/Http/Resources/V2/`) evolves
+  it — `name`→`display_name`, adds `handle`, drops `email`, embedded
+  `posts` becomes `posts_count`. The V2 controller extends V1 and reuses
+  `users()`; versions share data access, not representations.
+- **Unversioned** `/api/users`, `/api/webhook-endpoints`, etc. are
+  untouched and keep working.
+- **Unknown versions** — `/api/v9/users` and `/docs/v9/openapi.json`
+  return a normal 404; nothing falls back to another version.
+- **Docs** — `/docs/v1/openapi.json` and `/docs/v2/openapi.json` emit
+  specs filtered by actual route version metadata (`x-api-version` in
+  the document); `/docs/{version}` serves the matching viewer.
+  `/docs/openapi.json` continues to document everything.
+- **Naming** — versioned routes carry their own names (`api.v1.users`),
+  so `describe()` metadata is declared per version in
+  `App\Providers\OpenApiProvider`.
+- **Adding v3** — another `Link::version('v3', …)` block, a V3 resource
+  only where the shape changed, matching `describe()` entries; V1/V2
+  consumers are unaffected.
+
+`Router::versions()` reports the versions actually registered —
+`['v1', 'v2']` — never what config merely mentions.
+
 ## Configuration
 
 - `config/*.php` are plain arrays keyed by file name; read them with
@@ -407,6 +456,126 @@ a stack trace.
 - Environment variables are listed by `php sahil env:check` and defaulted
   in `config/`. Put local values in `.env` (gitignored) or inject them from
   the environment in production.
+- **Locale:** `APP_LOCALE` (default `sw`), `APP_FALLBACK_LOCALE` (default
+  `sw`) and `APP_AVAILABLE_LOCALES` (default `sw,en`, comma-separated)
+  control the application language — see Localization below.
+
+## Routing
+
+Routes are declared in `routes/web.php` (and `routes/auth.php` when the
+auth scaffold is installed) as an array of `Sahil\Routing\Link`
+definitions, registered by `App\Providers\WebRoutesProvider` at boot:
+
+```php
+use Sahil\Routing\Link;
+
+return [
+    Link::get('/users/{id}', [UserController::class, 'show'])->name('users.show'),
+    Link::post('/users', [UserController::class, 'store'])->name('users.store'),
+    Link::put('/users/{id}', [UserController::class, 'update']),
+    Link::patch('/users/{id}', [UserController::class, 'updatePartial']),
+    Link::delete('/users/{id}', [UserController::class, 'destroy']),
+    Link::options('/users', [UserController::class, 'options']),
+    Link::any('/status', [StatusController::class, 'response']),
+    Link::match(['GET', 'POST'], '/contact', [ContactController::class, 'handle']),
+];
+```
+
+- Handlers are `Closure` or `[Controller::class, 'method']`; controllers
+  resolve through the container, so constructor dependencies inject
+  automatically. Handlers receive `(Request $request, array $params)`.
+- `{param}` captures one segment, `{param:pattern}` constrains it with a
+  PCRE fragment, `{param?}` marks a trailing optional parameter.
+- `->name('...')` names a route for reverse routing
+  (`$router->generate('users.show', ['id' => 42])`); `->middleware(...)`
+  attaches per-route middleware.
+- Groups use `Link::prefix('/admin')->middleware([...])->group(fn () => [
+  ...links ])` and spread into the returned array, or the one-call
+  `Link::group('/admin', fn () => [...], [...])`.
+- `Sahil\Http\Route` still works as a deprecated alias of `Link` — same
+  router, same registry — but new code should use `Link`.
+- `php sahil route:list` prints the registered table.
+
+## API documentation
+
+An OpenAPI 3.1 document is generated live from the **registered route
+table** — never a hand-maintained spec — and served through the real
+kernel:
+
+- `GET /docs/openapi.json` → the document (`application/json`).
+- `GET /docs` → a self-contained docs page (zero CDN) that renders it.
+
+Both are plain `Link` routes handled by `App\Http\DocsController`; the
+router is container-injected, so the spec always reflects the app serving
+the request. `config/openapi.php` controls the surface:
+
+| Key | Purpose |
+|---|---|
+| `title` / `description` / `version` / `servers` | `info` + `servers` blocks |
+| `exclude_paths` | Exact paths and `/prefix/*` wildcards hidden from the document (docs itself, `/health`, `/ui-kit`, `/firefiber*`) |
+| `enabled` | `false` 404s both endpoints — use env `OPENAPI_ENABLED=false` in production if docs must not be public |
+| `ui_library_url` | Opt-in vendored Swagger UI asset URL; empty keeps the built-in viewer |
+| `license` / `license_url` | Optional `info.license` block |
+| `tag_descriptions` | Longer descriptions for tags used in `describe()` |
+
+What is *inferred* from `Link` objects: methods (HEAD/OPTIONS skipped),
+paths, `{param}` placeholders as required path params, route names as
+`operationId`s, and middleware — `auth:api` marks the operation with the
+`bearerAuth` HTTP scheme plus 401/403 responses, `token:<ability>`
+records `x-token-abilities`. No controller, middleware, or handler is
+ever executed during generation.
+
+What cannot be inferred is *declared* in
+`App\Providers\OpenApiProvider` via `OpenApi::describe('route.name', …)`:
+summaries, tags, `pathParams` descriptions/schemas, `rules` (the
+validation syntax, mapped to a JSON request body — unmappable rules emit
+diagnostics instead of false claims), `responses` keyed by status
+(`['resource' => X::class, 'collection' => true, 'paginated' => true]`,
+or `['schema' => …]` / `['rules' => …]`), `apiQuery` (page/perPage/filter/
+sort/search/fields parameters), and `security` overrides (`null` marks a
+route public). Response fields come from each resource's static
+`apiSchema()` — `toArray()` is never executed and model properties are
+never enumerated, so hidden fields like `WebhookEndpoint::secret` can't
+leak. `OpenApi::diagnostics()` reports warnings/errors; a `describe()`
+key that matches no registered route is always an error. Enable
+`'strict' => true` to throw on errors at generation time.
+
+## Localization
+
+SahilPHP applications are multilingual out of the box, with **Kiswahili
+(`sw`) as the default locale**. `SetLocale` middleware (registered in
+`app/Providers/WebRoutesProvider.php`, after `StartSession`) resolves the
+locale for each request:
+
+1. `?lang=xx` — validated against `app.available_locales`, persisted to
+   the session;
+2. the stored session preference;
+3. `Accept-Language` negotiation (disabled via `app.locale_negotiate`);
+4. `app.locale` — `sw` unless you change it.
+
+Translations live in `lang/{locale}/{group}.php` as plain PHP arrays:
+
+```php
+// lang/sw/messages.php
+return ['welcome' => 'Karibu kwenye programu yetu.'];
+// lang/en/messages.php
+return ['welcome' => 'Welcome to our application.'];
+```
+
+```php
+__('messages.welcome');                          // active locale, fallback, then key
+__('messages.welcome_user', ['name' => 'Asha']); // :name placeholder replacement
+trans_choice('messages.users', $count);          // locale-aware pluralization
+app()->setLocale('en');                          // runtime switch (request-safe)
+```
+
+Application catalogs override the framework's bundled `sw`/`en` catalogs
+key-by-key — copy only the keys you want to change. Validation messages,
+auth messages, pagination labels and error pages are already localized;
+publish the error views (`php sahil error:publish`) and add your own
+`lang/{locale}/errors.php` to localize custom pages. Locale state is
+request-scoped, so it cannot leak between requests under long-running
+workers.
 
 ## Database
 
@@ -476,6 +645,7 @@ are skipped unless `SAHIL_DB_TEST_MYSQL` / `SAHIL_DB_TEST_PGSQL` are set.
 | `bootstrap/commands.php` | Application command manifest (empty by default) |
 | `config/` | Configuration arrays |
 | `database/` | Migrations and seeders |
+| `lang/` | Application translations (`lang/sw`, `lang/en` ship by default) |
 | `public/index.php` | HTTP front controller |
 | `public/css`, `public/js` | Hand-written UI kit assets |
 | `resources/` | Frontend sources for the Vite build |

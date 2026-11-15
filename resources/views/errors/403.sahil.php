@@ -1,6 +1,6 @@
 @extends('errors.layout')
 
-@section('title')Access denied@endsection
+@section('title'){{ __('errors.access_denied_title') }}@endsection
 
 @section('head')
     <style>
@@ -82,15 +82,12 @@
 @section('content')
     <div class="error__lock" aria-hidden="true"><span></span></div>
 
-    <h1>You do not have access to this page</h1>
-    <p>
-        Your account is recognised, but it is not allowed to open this page. Nothing is
-        broken — this is a permissions decision, not an error on your side.
-    </p>
+    <h1>{{ __('errors.access_denied_title') }}</h1>
+    <p>{{ __('errors.access_denied_detail') }}</p>
 
     <ul class="error__notes">
-        <li>If this page is yours, sign in with an account that has the required role.</li>
-        <li>Otherwise ask the site administrator to grant your account access.</li>
-        <li>Followed a link to get here? It may be out of date or belong to another team.</li>
+        <li>{{ __('errors.denied_step_role') }}</li>
+        <li>{{ __('errors.denied_step_admin') }}</li>
+        <li>{{ __('errors.denied_step_link') }}</li>
     </ul>
 @endsection

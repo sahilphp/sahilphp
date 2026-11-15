@@ -12,6 +12,8 @@ use Sahil\Http\Request;
 use Sahil\Http\Middleware\SecurityHeaders;
 use Sahil\Support\Logging\FileLogger;
 use Sahil\Support\Logging\LoggerContract;
+use Sahil\Support\Logging\LogManager;
+use Sahil\Support\Logging\StderrLogger;
 
 /**
  * Registers observability services: the structured file logger and the
@@ -30,15 +32,51 @@ final class ObservabilityProvider extends ServiceProvider
         $container = $this->app()->container();
 
         $container->singleton(
-            LoggerContract::class,
-            static function (\Sahil\Container\Container $c): LoggerContract {
+            LogManager::class,
+            static function (\Sahil\Container\Container $c): LogManager {
                 $app = $c->make(\Sahil\Contracts\Foundation\ApplicationContract::class);
+                $config = (array) $app->config()->get('logging', []);
+                $channels = [];
 
-                return new FileLogger(
-                    $app->storagePath('logs/app.log'),
-                    (string) $app->config()->get('app.log_level', 'info')
-                );
+                foreach ((array) ($config['channels'] ?? []) as $name => $channel) {
+                    $driver = (string) ($channel['driver'] ?? 'file');
+
+                    $channels[$name] = match ($driver) {
+                        'file' => new FileLogger(
+                            (string) ($channel['path'] ?? $app->storagePath('logs/app.log')),
+                            (string) ($channel['level'] ?? 'info'),
+                            (string) ($channel['format'] ?? 'json'),
+                            (string) ($channel['name'] ?? $name),
+                        ),
+                        'stderr' => new StderrLogger(
+                            null,
+                            (string) ($channel['level'] ?? 'info'),
+                            (string) ($channel['format'] ?? 'json'),
+                            (string) ($channel['name'] ?? $name),
+                        ),
+                        'stack' => (array) ($channel['channels'] ?? []),
+                        default => throw new \RuntimeException("Unknown log channel driver [{$driver}] for [{$name}]."),
+                    };
+                }
+
+                // `log_level`/`app.log_level` still works: a `file` channel
+                // exists even when config/logging.php is absent.
+                if ($channels === []) {
+                    $channels['file'] = new FileLogger(
+                        $app->storagePath('logs/app.log'),
+                        (string) $app->config()->get('app.log_level', 'info'),
+                    );
+                }
+
+                return new LogManager($channels, (string) ($config['default'] ?? 'file'));
             }
+        );
+
+        // `LoggerContract` resolves the manager itself — shared context
+        // (request ids, job scopes) applies to every injection site.
+        $container->singleton(
+            LoggerContract::class,
+            static fn (\Sahil\Container\Container $c): LoggerContract => $c->make(LogManager::class)
         );
 
         $container->singleton(
@@ -73,7 +111,14 @@ final class ObservabilityProvider extends ServiceProvider
 
             $container->instance(Kernel::class, $kernel->usingExceptionHandler(
                 static function (\Throwable $throwable, ?Request $request = null) use ($handler, $debug): ?\Sahil\Http\Response {
-                    $handler->report($throwable);
+                    // Validation failures are ordinary responses — the kernel
+                    // turns them into the 303/422 contract itself — not
+                    // reportable errors.
+                    if ($throwable instanceof \Sahil\Validation\ValidationException) {
+                        return null;
+                    }
+
+                    $handler->report($throwable, $request);
 
                     return $handler->render($throwable, $debug, $request);
                 }

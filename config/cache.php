@@ -28,7 +28,13 @@ return [
 
         'redis' => [
             'driver' => 'redis',
-            'connection' => 'default',
+            'host' => env('REDIS_HOST', '127.0.0.1'),
+            'port' => (int) env('REDIS_PORT', 6379),
+            'password' => env('REDIS_PASSWORD', null),
+            'database' => (int) env('REDIS_DB', 0),
+            // Key namespace inside a shared Redis database — set a unique
+            // prefix per application so keys and flush() stay isolated.
+            'prefix' => env('CACHE_PREFIX', 'sahil:cache:'),
         ],
 
     ],

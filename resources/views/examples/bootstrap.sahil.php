@@ -53,7 +53,8 @@
                 <div class="card-body">
                     <h2 class="h5 mb-3">Form</h2>
 
-                    <form method="post" action="/ui-kit">
+                    <form method="post" action="{{ link('ui-kit') }}">
+                        @csrf
                         <div class="row">
                             <div class="col-md-6">
                                 @include('partials.field', [

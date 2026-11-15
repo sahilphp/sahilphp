@@ -35,14 +35,16 @@ final class CacheProvider extends ServiceProvider
         // Build cache instance based on driver
         switch (strtolower($driver)) {
             case 'redis':
-                $options = $stores[$default]['options'] ?? [];
-                // Only use Redis if the extension is available
-                if (extension_loaded('redis')) {
-                    $cache = new RedisCache($options);
-                } else {
-                    // Fall back to file cache if redis extension not loaded
-                    $cache = new FileCache(storage_path('framework/cache'));
-                }
+                // Fail clearly rather than silently degrading to file —
+                // a configured-but-unavailable Redis is a real defect.
+                $store = $stores[$default];
+                $cache = new RedisCache([
+                    'host' => $store['host'] ?? '127.0.0.1',
+                    'port' => (int) ($store['port'] ?? 6379),
+                    'password' => $store['password'] ?? null,
+                    'database' => (int) ($store['database'] ?? 0),
+                    'prefix' => (string) ($store['prefix'] ?? 'sahil:cache:'),
+                ]);
                 break;
 
             case 'file':

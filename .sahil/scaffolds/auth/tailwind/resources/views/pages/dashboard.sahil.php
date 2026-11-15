@@ -15,10 +15,10 @@
             <a class="inline-flex h-9 items-center rounded-md border border-slate-200 bg-white px-3 text-sm font-medium text-slate-700 shadow-sm transition hover:bg-slate-50"
                 href="/ui-kit">Components</a>
             <a class="inline-flex h-9 items-center rounded-md bg-primary px-3 text-sm font-semibold text-primary-foreground shadow-sm transition hover:opacity-90"
-                href="/register">Invite member</a>
+                href="{{ link('register') }}">Invite member</a>
 
-            <form class="inline" method="post" action="/logout">
-                <input type="hidden" name="_token" value="{{ csrf_token }}">
+            <form class="inline" method="post" action="{{ link('logout') }}">
+                @csrf
                 <button class="inline-flex h-9 items-center rounded-md border border-slate-200 bg-white px-3 text-sm font-medium text-slate-700 shadow-sm transition hover:bg-slate-50"
                     type="submit">Sign out</button>
             </form>

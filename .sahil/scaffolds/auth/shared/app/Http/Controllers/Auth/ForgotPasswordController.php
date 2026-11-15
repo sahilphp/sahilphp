@@ -11,8 +11,7 @@ use Sahil\Contracts\View\ViewContract;
 use Sahil\Http\Request;
 use Sahil\Http\Response;
 use Sahil\Mail\Message;
-use Sahil\Validation\ValidationResult;
-use Sahil\Validation\Validator;
+use Sahil\Validation\ValidationException;
 use Throwable;
 
 /**
@@ -38,20 +37,15 @@ final class ForgotPasswordController
 
     public function sendResetLinkEmail(Request $request): Response
     {
-        $form = $request->form();
-        $email = $this->email($form);
-
-        $result = $this->validator([
-            'email' => 'required|email|length:3,190',
+        $data = $request->form()->validate([
+            'email' => 'required|email|min:3|max:190',
         ], [
             'email.required' => 'Enter the email address for your account.',
             'email.email' => 'Enter a valid email address, like you@example.com.',
-            'email.length' => 'That email address is too long.',
-        ])->validate([...$form, 'email' => $email]);
+            'email.max' => 'That email address is too long.',
+        ], bag: 'forgot', normalize: 'trim');
 
-        if ($result->fails()) {
-            return $this->formPage('auth.forgot-password', $result, $form);
-        }
+        $email = strtolower($data['email']);
 
         $token = $this->reset->createToken($email);
 
@@ -59,18 +53,17 @@ final class ForgotPasswordController
             try {
                 $this->sendResetMail($request, $email, $token);
             } catch (Throwable) {
-                return $this->formPage('auth.forgot-password', $result, $form, null, [
-                    'email' => 'We could not send the reset email right now. Please try again.',
-                ]);
+                throw ValidationException::withMessages(
+                    ['email' => 'We could not send the reset email right now. Please try again.'],
+                    bag: 'forgot',
+                    input: $request->form()->all(),
+                );
             }
         }
 
-        return $this->formPage(
-            'auth.forgot-password',
-            $result,
-            $form,
-            sprintf('If an account exists for %s, a password reset link is on its way.', $email),
-        );
+        return $this->page('auth.forgot-password', [
+            'status' => sprintf('If an account exists for %s, a password reset link is on its way.', $email),
+        ]);
     }
 
     /**
@@ -101,59 +94,6 @@ final class ForgotPasswordController
     }
 
     /**
-     * @param array<string, string|array<int, string|\Closure>> $rules
-     * @param array<string, string> $messages
-     */
-    private function validator(array $rules, array $messages): Validator
-    {
-        return new Validator($rules, $messages);
-    }
-
-    /**
-     * @param array<string, string> $form
-     * @param array<string, string> $errors
-     */
-    private function formPage(
-        string $view,
-        ?ValidationResult $result = null,
-        array $form = [],
-        ?string $status = null,
-        array $errors = [],
-    ): Response {
-        $messages = [];
-
-        foreach ($result?->errors() ?? [] as $field => $list) {
-            $messages[$field] = $list[0] ?? '';
-        }
-
-        return $this->page($view, [
-            'errors' => [...$messages, ...$errors],
-            'old' => [
-                'email' => $this->oldString($form, 'email'),
-            ],
-            'status' => $status,
-        ]);
-    }
-
-    /**
-     * @param array<string, mixed> $form
-     */
-    private function oldString(array $form, string $key): string
-    {
-        $value = $form[$key] ?? '';
-
-        return is_string($value) ? $value : '';
-    }
-
-    /**
-     * @param array<string, mixed> $form
-     */
-    private function email(array $form): string
-    {
-        return strtolower(trim($this->oldString($form, 'email')));
-    }
-
-    /**
      * @param array<string, mixed> $data
      */
     private function page(string $view, array $data = []): Response
@@ -161,7 +101,6 @@ final class ForgotPasswordController
         return Response::html($this->views->render($view, [
             'app_name' => (string) $this->application->config()->get('app.name', 'SahilPHP'),
             'year' => gmdate('Y'),
-            'csrf_token' => csrf_token(),
             ...$data,
         ]));
     }

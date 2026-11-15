@@ -1,6 +1,6 @@
 @extends('errors.layout')
 
-@section('title')Page expired@endsection
+@section('title'){{ __('errors.expired_title') }}@endsection
 
 @section('head')
     <style>
@@ -101,11 +101,8 @@
 @endsection
 
 @section('content')
-    <h1>Your page has expired</h1>
-    <p>
-        You were away long enough that this page's security token stopped being valid, so
-        the form could not be submitted. Nothing was sent and nothing was changed.
-    </p>
+    <h1>{{ __('errors.expired_title') }}</h1>
+    <p>{{ __('errors.expired_detail') }}</p>
 
     <div class="error__ticket">
         <div>
@@ -116,9 +113,9 @@
     </div>
 
     <ul class="error__notes">
-        <li>Reload the page and submit the form again — the refreshed token is valid.</li>
-        <li>If the form was long, keep a copy of what you typed before reloading.</li>
-        <li>Signed out in another tab? Signing in again resets the session.</li>
+        <li>{{ __('errors.expired_step_reload') }}</li>
+        <li>{{ __('errors.expired_step_copy') }}</li>
+        <li>{{ __('errors.expired_step_signin') }}</li>
     </ul>
 @endsection
 

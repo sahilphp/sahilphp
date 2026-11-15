@@ -20,16 +20,16 @@
             </div>
         @endif
 
-        <form class="space-y-4" method="post" action="/forgot-password" novalidate>
-            <input type="hidden" name="_token" value="{{ csrf_token }}">
+        <form class="space-y-4" method="post" action="{{ link('password.email') }}" novalidate>
+            @csrf
 
             <div class="space-y-2">
                 <label class="text-sm font-medium leading-none" for="email">Email</label>
-                <input class="flex h-10 w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm shadow-sm transition placeholder:text-slate-400 focus-visible:border-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30@if (errors.email ?? null) border-red-400 focus-visible:border-red-400 focus-visible:ring-red-200@endif"
+                <input class="flex h-10 w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm shadow-sm transition placeholder:text-slate-400 focus-visible:border-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30@if (error('email', 'forgot')) border-red-400 focus-visible:border-red-400 focus-visible:ring-red-200@endif"
                     id="email" name="email" type="email" value="{{ old.email ?? '' }}" placeholder="you@example.com"
                     autocomplete="email" required>
-                @if (errors.email ?? null)
-                    <p class="text-xs font-medium text-red-600" id="email-error">{{ errors.email }}</p>
+                @if (error('email', 'forgot'))
+                    <p class="text-xs font-medium text-red-600" id="email-error">{{ error('email', 'forgot') }}</p>
                 @endif
             </div>
 
@@ -38,7 +38,7 @@
         </form>
 
         <p class="text-center text-sm text-slate-500">
-            <a class="font-medium text-primary hover:underline" href="/login">← Back to sign in</a>
+            <a class="font-medium text-primary hover:underline" href="{{ link('login') }}">← Back to sign in</a>
         </p>
     </div>
 @endsection

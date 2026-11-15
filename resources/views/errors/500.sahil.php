@@ -1,6 +1,6 @@
 @extends('errors.layout')
 
-@section('title')Server error@endsection
+@section('title'){{ __('errors.server_error_title') }}@endsection
 
 @section('head')
     <style>
@@ -65,18 +65,14 @@
 @endsection
 
 @section('content')
-    <h1>Something went wrong on our end</h1>
-    <p>
-        An unexpected error stopped this page from finishing. It is not something you did,
-        and nothing you submitted has been lost.
-    </p>
+    <h1>{{ __('errors.server_error_title') }}</h1>
+    <p>{{ __('errors.server_error_detail') }}</p>
 
     <ol class="error__steps">
-        <li><strong>Wait a moment.</strong> Most of these errors clear on their own within a minute.</li>
-        <li><strong>Reload the page.</strong> A fresh request often succeeds where the last one failed.</li>
-        <li><strong>If it keeps happening,</strong> contact the site administrator and mention the
-            status code <strong>500</strong> — the details have already been logged.</li>
+        <li>{!! __('errors.step_wait') !!}</li>
+        <li>{!! __('errors.step_reload') !!}</li>
+        <li>{!! __('errors.step_contact') !!}</li>
     </ol>
 
-    <a class="error__reload" href="">Reload this page</a>
+    <a class="error__reload" href="">{{ __('errors.reload_page') }}</a>
 @endsection
