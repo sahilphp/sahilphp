@@ -29,6 +29,12 @@ function sahil_bootstrap(): Application
     static $application = null;
 
     if ($application instanceof Application) {
+        // A test may have released the process handle while this cached
+        // instance lives on — keep `app()` resolving the same application.
+        if (Application::peek() !== $application) {
+            Application::pin($application);
+        }
+
         return $application;
     }
 

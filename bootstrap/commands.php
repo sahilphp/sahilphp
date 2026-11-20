@@ -22,4 +22,5 @@ declare(strict_types=1);
 return [
     \Sahil\Firefiber\Console\Commands\FirefiberPageCommand::class,
     \Sahil\Firefiber\Console\Commands\FirefiberComponentCommand::class,
+    \Sahil\Firefiber\Console\Commands\FirefiberUploadsCleanupCommand::class,
 ];

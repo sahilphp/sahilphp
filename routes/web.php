@@ -35,5 +35,7 @@ return [
     ]),
     Link::get('/api/webhook-endpoints', [\App\Http\WebhookApiController::class, 'index'])->name('api.webhook-endpoints'),
     Link::get('/ui-kit', [UiKitController::class, 'response'])->name('ui-kit'),
+    // Firefiber pages mount directly on the route table — no controller.
+    Link::firefiber('/firefiber/admin-users', \App\Firefiber\Pages\AdminUsersPage::class)->name('firefiber.admin-users'),
     Link::get('/', [HomeController::class, 'response'])->name('home'),
 ];

@@ -9,11 +9,12 @@ use PHPUnit\Framework\TestCase;
 use Sahil\Foundation\Application;
 use Sahil\Rendering\Render;
 use Sahil\Rendering\RenderManager;
+use Sahil\Routing\Link;
 
 /**
- * End-to-end: the Firefiber provider's RenderManager binding carries both
- * the native `html` adapter and Firefiber's `fire` adapter, and a real
- * controller renders a real page through the unified API.
+ * Firefiber pages mount directly on the route table — `Link::firefiber()`
+ * or the provider's auto-discovery — and never flow through controller
+ * render helpers, so the `fire`/`fiber` render environments are gone.
  */
 final class UnifiedRenderTest extends TestCase
 {
@@ -25,7 +26,7 @@ final class UnifiedRenderTest extends TestCase
         parent::tearDown();
     }
 
-    public function test_fire_and_html_environments_registered(): void
+    public function test_html_environment_registered_without_firefiber_envs(): void
     {
         $app = $this->boot();
 
@@ -33,50 +34,36 @@ final class UnifiedRenderTest extends TestCase
         $manager = $app->container()->make(RenderManager::class);
 
         self::assertContains('html', $manager->environments());
-        self::assertContains('fire', $manager->environments());
-        self::assertContains('fiber', $manager->environments());
+        self::assertNotContains('fire', $manager->environments());
+        self::assertNotContains('fiber', $manager->environments());
     }
 
-    public function test_fire_resolves_page_templates_under_firefiber_pages(): void
+    public function test_link_firefiber_mounts_a_page_class_at_its_own_path(): void
     {
         $this->boot();
 
-        // `resources/views/firefiber/pages/admin_users.sahil.php` is the
-        // conventional location; `fire()` finds it without a class name.
-        $response = Render::fire('admin_users', ['page_title' => 'Admin Users', 'components' => []]);
+        $link = Link::firefiber(\App\Firefiber\Pages\AdminUsersPage::class)->name('test.admin-users');
 
-        self::assertSame(200, $response->status());
-        self::assertStringContainsString('Admin Users', $response->body());
-        self::assertStringContainsString('<main', $response->body());
+        self::assertSame('/firefiber/admin-users', $link->path());
+        self::assertSame([\App\Firefiber\Pages\AdminUsersPage::class, 'show'], $link->handler());
     }
 
-    public function test_fiber_alias_resolves_the_same_page_template(): void
+    public function test_link_firefiber_accepts_an_explicit_path(): void
     {
         $this->boot();
 
-        $response = Render::fiber('admin_users', ['page_title' => 'Admin Users', 'components' => []]);
+        $link = Link::firefiber('/admin/users/{id}', \App\Firefiber\Pages\AdminUsersPage::class);
 
-        self::assertStringContainsString('Admin Users', $response->body());
+        self::assertSame('/admin/users/{id}', $link->path());
     }
 
-    public function test_fire_falls_back_to_component_names(): void
+    public function test_link_firefiber_rejects_non_page_classes(): void
     {
         $this->boot();
 
-        $response = Render::fire('AdminUsersTable', ['search' => 'a']);
+        $this->expectException(\InvalidArgumentException::class);
 
-        self::assertStringContainsString('data-firefiber-component', $response->body());
-    }
-
-    public function test_fire_renders_real_component_markup(): void
-    {
-        $this->boot();
-
-        $response = Render::fire('AdminUsersTable', ['search' => 'a']);
-
-        self::assertSame(200, $response->status());
-        self::assertStringContainsString('text/html', (string) $response->header('Content-Type'));
-        self::assertStringContainsString('data-firefiber-component', $response->body());
+        Link::firefiber(HomeController::class);
     }
 
     public function test_controller_html_helper_renders_real_template(): void
@@ -91,26 +78,12 @@ final class UnifiedRenderTest extends TestCase
         self::assertSame('pages.home', $response->renderedView()?->template());
     }
 
-    public function test_response_fire_factory_through_app_manager(): void
-    {
-        $this->boot();
-
-        $response = \Sahil\Http\Response::fire('AdminUsersTable', ['page' => 1]);
-
-        self::assertSame('fire', $response->frontend());
-        self::assertStringContainsString('data-firefiber-component', $response->body());
-        self::assertSame('AdminUsersTable', $response->renderedView()?->template());
-    }
-
     private function boot(): Application
     {
         require_once dirname(__DIR__, 2).'/bootstrap/app.php';
 
         $app = \sahil_bootstrap();
 
-        // `sahil_bootstrap()` caches its instance, so the process-configured
-        // handle may be gone after another test's `Application::free()` —
-        // point Render at this app's manager explicitly.
         /** @var RenderManager $manager */
         $manager = $app->container()->make(RenderManager::class);
         Render::swap($manager);
