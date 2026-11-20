@@ -328,8 +328,56 @@ use RuntimeException;
 
         $this->configureProviders($root, $uiKit);
         $this->configureCommands($root, $uiKit);
+        $this->removeFirefiberArtifacts($root, $uiKit);
 
         $this->removeTree($stubRoot);
+    }
+
+    /**
+     * Remove the starter's demo Firefiber page when a different UI kit is
+     * selected.
+     *
+     * `sahilphp/firefiber` is only kept in the generated project's
+     * dependencies when the Firefiber kit is chosen, so every artifact that
+     * references `Sahil\Firefiber` classes must go with it. Leaving the
+     * `Link::firefiber()` route (or the `App\Firefiber` page classes)
+     * behind makes route registration fatal on autoload — the application
+     * boots and every request returns a 500.
+     */
+    private function removeFirefiberArtifacts(string $root, string $uiKit): void
+    {
+        if ($uiKit === 'firefiber') {
+            return;
+        }
+
+        $routes = $root.'/routes/web.php';
+
+        if (is_file($routes)) {
+            $content = (string) file_get_contents($routes);
+            $content = (string) preg_replace(
+                '/^[ \t]*\/\/[^\n]*Firefiber[^\n]*\R[ \t]*Link::firefiber\([^\n]*\R?/m',
+                '',
+                $content,
+            );
+            // Belt-and-braces: any other firefiber route (custom or
+            // comment-less) cannot survive without the package either.
+            $content = (string) preg_replace(
+                '/^[ \t]*Link::firefiber\([^\n]*\R?/m',
+                '',
+                $content,
+            );
+            $this->write($routes, $content);
+        }
+
+        foreach (['app/Firefiber', 'resources/views/firefiber', 'tests/Firefiber'] as $tree) {
+            $this->removeTree($root.'/'.$tree);
+        }
+
+        $config = $root.'/config/firefiber.php';
+
+        if (is_file($config) && !@unlink($config)) {
+            throw new RuntimeException(sprintf('unable to remove [%s].', $config));
+        }
     }
 
     /**

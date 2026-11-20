@@ -6,6 +6,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Fixed
+- `php sahil ui:setup` with any non-Firefiber kit (`none`/Sahil Engine,
+  React, Vue, Svelte) no longer leaves Firefiber demo artifacts behind:
+  the `Link::firefiber()` route, `app/Firefiber/` classes,
+  `config/firefiber.php`, `resources/views/firefiber/` and
+  `tests/Firefiber/` are now removed alongside the provider/commands
+  stripping. Previously the leftover route referenced classes from the
+  uninstalled `sahilphp/firefiber` package, so route registration fatals
+  at boot and every request in the generated project returned a 500.
+
 ### Added
 - `resources/views/firefiber/pages/admin_users.sahil.php`: the starter
   Firefiber page (`App\Firefiber\Pages\AdminUsersPage`) now renders through

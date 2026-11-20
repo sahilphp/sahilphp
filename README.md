@@ -456,6 +456,9 @@ metadata:
 - Environment variables are listed by `php sahil env:check` and defaulted
   in `config/`. Put local values in `.env` (gitignored) or inject them from
   the environment in production.
+- **Identification:** `config/identification.php` controls the public
+  framework fingerprint (generator metadata and `X-Powered-By`) — see
+  `docs/IDENTIFICATION.md`.
 - **Locale:** `APP_LOCALE` (default `sw`), `APP_FALLBACK_LOCALE` (default
   `sw`) and `APP_AVAILABLE_LOCALES` (default `sw,en`, comma-separated)
   control the application language — see Localization below.

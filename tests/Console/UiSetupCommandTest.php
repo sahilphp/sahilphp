@@ -317,6 +317,73 @@ final class UiSetupCommandTest extends TestCase
         self::assertGreaterThan($html, $fire);
     }
 
+    /**
+     * The starter ships a Firefiber demo (route, page/component classes,
+     * config, views, tests) that only autoloads while `sahilphp/firefiber`
+     * is installed. Choosing another kit drops the package, so every
+     * artifact must go with it — otherwise route registration fatals and
+     * the generated application answers every request with a 500.
+     */
+    public function test_non_firefiber_kits_remove_the_firefiber_demo(): void
+    {
+        foreach (['none', 'react', 'vue', 'svelte'] as $kit) {
+            $this->tearDown();
+            $this->setUp();
+            $this->seedFirefiberDemo();
+
+            [$code] = $this->runCommand([], '--ui-kit=' . $kit, '--css=tailwind');
+            self::assertSame(0, $code, $kit);
+
+            $routes = (string) file_get_contents($this->project . '/routes/web.php');
+            self::assertStringNotContainsString('firefiber', $routes, $kit);
+            // The removal must not eat neighbouring route entries.
+            self::assertStringContainsString("Link::get('/',", $routes, $kit);
+            self::assertDirectoryDoesNotExist($this->project . '/app/Firefiber', $kit);
+            self::assertFileDoesNotExist($this->project . '/config/firefiber.php', $kit);
+            self::assertDirectoryDoesNotExist($this->project . '/tests/Firefiber', $kit);
+            self::assertDirectoryDoesNotExist($this->project . '/resources/views/firefiber', $kit);
+        }
+    }
+
+    public function test_firefiber_kit_keeps_the_firefiber_demo(): void
+    {
+        $this->seedFirefiberDemo();
+
+        [$code] = $this->runCommand([], '--ui-kit=firefiber', '--css=tailwind');
+        self::assertSame(0, $code);
+
+        self::assertStringContainsString(
+            'Link::firefiber',
+            (string) file_get_contents($this->project . '/routes/web.php'),
+        );
+        self::assertFileExists($this->project . '/app/Firefiber/Pages/AdminUsersPage.php');
+        self::assertFileExists($this->project . '/config/firefiber.php');
+        self::assertDirectoryExists($this->project . '/tests/Firefiber');
+        self::assertDirectoryExists($this->project . '/resources/views/firefiber');
+    }
+
+    /**
+     * Seed the Firefiber demo files the way a fresh `sahilphp/sahilphp`
+     * install ships them (the temp project only mirrors `stubs/` and
+     * `bootstrap/` by default).
+     */
+    private function seedFirefiberDemo(): void
+    {
+        $root = dirname(__DIR__, 2);
+
+        foreach (['routes', 'app', 'config', 'tests', 'resources/views'] as $dir) {
+            if (!is_dir($this->project . '/' . $dir) && !mkdir($this->project . '/' . $dir, 0o777, true) && !is_dir($this->project . '/' . $dir)) {
+                self::fail('Unable to create ' . $dir . ' in the temporary project.');
+            }
+        }
+
+        copy($root . '/routes/web.php', $this->project . '/routes/web.php');
+        copy($root . '/config/firefiber.php', $this->project . '/config/firefiber.php');
+        $this->copyTree($root . '/app/Firefiber', $this->project . '/app/Firefiber');
+        $this->copyTree($root . '/tests/Firefiber', $this->project . '/tests/Firefiber');
+        $this->copyTree($root . '/resources/views/firefiber', $this->project . '/resources/views/firefiber');
+    }
+
     private function removeTree(string $path): void
     {
         if (!is_dir($path)) {

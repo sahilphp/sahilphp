@@ -56,12 +56,18 @@ final class HttpEntryPointTest extends TestCase
 
         self::assertSame(200, $status);
         self::assertSame('text/html; charset=utf-8', $contentType);
-        self::assertStringContainsString('<meta name="generator" content="SahilPHP">', $body);
+        // The kernel injects the generator signature — `SahilPHP` plus the
+        // installed framework version when one is resolved (docs/IDENTIFICATION.md).
+        self::assertMatchesRegularExpression(
+            '/<meta name="generator" content="SahilPHP(?: \d+\.\d+(?:\.\d+)?[^"]*)?">/',
+            $body,
+        );
         self::assertMatchesRegularExpression('/<title>\s*Welcome · SahilPHP\s*<\/title>/u', $body);
         self::assertStringNotContainsString('laravel', strtolower($body));
 
         $responseHeaders = implode("\n", $headers);
 
+        self::assertStringContainsString('X-Powered-By: SahilPHP', $responseHeaders);
         self::assertStringContainsString('Set-Cookie: sahil_session=', $responseHeaders);
         self::assertStringNotContainsString('laravel_session', $responseHeaders);
         self::assertStringNotContainsString('XSRF-TOKEN', $responseHeaders);
